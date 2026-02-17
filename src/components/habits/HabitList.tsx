@@ -112,6 +112,48 @@ export function HabitList() {
           </button>
         </div>
 
+        {/* Getting started prompt */}
+        {activeHabits.length === 0 && archivedHabits.length === 0 && (
+          <Card>
+            <div className="px-5 py-8 text-center">
+              <h3 className="text-[16px] font-semibold text-white/80 mb-2">Get started</h3>
+              <p className="text-[13px] text-white/40 max-w-sm mx-auto mb-5">
+                Add the habits you want to track. Think about what makes you feel good and what drags you down.
+              </p>
+              <div className="text-left max-w-xs mx-auto mb-6 space-y-2">
+                <p className="text-[12px] text-white/30 uppercase tracking-wider font-medium">Ideas</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: 'Exercise', type: 'good' },
+                    { label: 'Read a book', type: 'good' },
+                    { label: 'Call a friend', type: 'good' },
+                    { label: 'Meditate', type: 'good' },
+                    { label: 'Junk food', type: 'bad' },
+                    { label: 'Late screen time', type: 'bad' },
+                  ].map(idea => (
+                    <span
+                      key={idea.label}
+                      className={`text-[12px] px-2.5 py-1.5 rounded-lg ${
+                        idea.type === 'good'
+                          ? 'bg-emerald-500/10 text-emerald-400/70'
+                          : 'bg-red-500/10 text-red-400/70'
+                      }`}
+                    >
+                      {idea.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={() => setShowForm(true)}
+                className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-[13px] font-medium text-white transition-colors"
+              >
+                Add your first habit
+              </button>
+            </div>
+          </Card>
+        )}
+
         {/* Good Habits */}
         {goodHabits.length > 0 && (
           <Card title={`Good Habits (${goodHabits.length})`}>

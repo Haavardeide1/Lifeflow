@@ -7,8 +7,10 @@ import type { HabitCompletion } from '@/types';
 import { HabitToggle } from './HabitToggle';
 import { SliderInput } from '@/components/shared/SliderInput';
 import { Card } from '@/components/shared/Card';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { formatDisplayDate, addDays, today, isToday, isFuture } from '@/lib/dateUtils';
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import Link from 'next/link';
 
 export function CheckInForm() {
   const habits = useLifeflowStore((s) => s.habits);
@@ -81,6 +83,27 @@ export function CheckInForm() {
     const next = addDays(checkinDate, 1);
     if (!isFuture(next)) setCheckinDate(next);
   };
+
+  if (activeHabits.length === 0) {
+    return (
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-lg mx-auto px-4 py-6">
+          <EmptyState
+            title="No habits to track yet"
+            description="Add some habits first, then come back here to check in."
+            action={
+              <Link
+                href="/habits"
+                className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-[13px] font-medium text-white transition-colors"
+              >
+                Set up your habits
+              </Link>
+            }
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-y-auto">
