@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { AppShell } from "@/components/layout";
 import { ServiceWorkerRegistration } from "@/components/shared/ServiceWorkerRegistration";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -50,6 +51,7 @@ export default function RootLayout({
       >
         <AppShell>{children}</AppShell>
         <ServiceWorkerRegistration />
+        <Analytics />
       </body>
     </html>
   );
