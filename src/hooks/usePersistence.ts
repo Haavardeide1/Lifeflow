@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useLifeflowStore } from '@/stores/lifeflowStore';
 import { useAuthStore } from '@/stores/authStore';
 import { autoSave, loadAutoSave } from '@/lib/database';
-import { loadUserData, upsertHabit, upsertEntry, upsertProfile, upsertWish, deleteWishCloud } from '@/lib/supabaseSync';
+import { loadUserData, upsertHabit, upsertEntry, upsertProfile, upsertWishes, deleteWishesCloud } from '@/lib/supabaseSync';
 import { calculateAllStreaks } from '@/lib/streaks';
 
 const SYNC_DELAY = 2000;
@@ -131,23 +131,24 @@ export function usePersistence() {
 
           // Sync wishes
           const wishIds = new Set(Object.keys(wishes));
-          for (const [id, wish] of Object.entries(wishes)) {
-            const prev = prevWishesRef.current[id];
-            if (!prev || prev.updatedAt !== wish.updatedAt) {
-              try {
-                await upsertWish(user.id, wish);
-              } catch (e) {
-                console.error('Failed to sync wish:', e);
-              }
+          const changedWishes = Object.values(wishes).filter((wish) => {
+            const prev = prevWishesRef.current[wish.id];
+            return !prev || prev.updatedAt !== wish.updatedAt;
+          });
+          const removedWishIds = Object.keys(prevWishesRef.current).filter((id) => !wishIds.has(id));
+
+          if (changedWishes.length > 0) {
+            try {
+              await upsertWishes(user.id, changedWishes);
+            } catch (e) {
+              console.error('Failed to sync wishes:', e);
             }
           }
-          for (const id of Object.keys(prevWishesRef.current)) {
-            if (!wishIds.has(id)) {
-              try {
-                await deleteWishCloud(id);
-              } catch (e) {
-                console.error('Failed to delete wish:', e);
-              }
+          if (removedWishIds.length > 0) {
+            try {
+              await deleteWishesCloud(removedWishIds);
+            } catch (e) {
+              console.error('Failed to delete wishes:', e);
             }
           }
 

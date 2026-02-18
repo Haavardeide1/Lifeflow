@@ -145,11 +145,44 @@ export async function upsertWish(userId: string, wish: Wish): Promise<void> {
   if (error) throw error;
 }
 
+export async function upsertWishes(userId: string, wishes: Wish[]): Promise<void> {
+  if (wishes.length === 0) return;
+  const payload = wishes.map((wish) => ({
+    id: wish.id,
+    user_id: userId,
+    title: wish.title,
+    kind: wish.kind,
+    habit_id: wish.habitId ?? null,
+    metric: wish.metric ?? null,
+    target_per_week: wish.targetPerWeek ?? null,
+    target_value: wish.targetValue ?? null,
+    active: wish.active,
+    created_at: new Date(wish.createdAt).toISOString(),
+    updated_at: new Date(wish.updatedAt).toISOString(),
+  }));
+
+  const { error } = await supabase
+    .from('wishes')
+    .upsert(payload, { onConflict: 'id' });
+
+  if (error) throw error;
+}
+
 export async function deleteWishCloud(wishId: string): Promise<void> {
   const { error } = await supabase
     .from('wishes')
     .delete()
     .eq('id', wishId);
+
+  if (error) throw error;
+}
+
+export async function deleteWishesCloud(wishIds: string[]): Promise<void> {
+  if (wishIds.length === 0) return;
+  const { error } = await supabase
+    .from('wishes')
+    .delete()
+    .in('id', wishIds);
 
   if (error) throw error;
 }

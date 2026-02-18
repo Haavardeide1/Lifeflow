@@ -1,4 +1,4 @@
-import type { Habit, DailyEntry, DateKey } from '@/types';
+import type { Habit, DailyEntry, DateKey, Wish } from '@/types';
 
 function escapeCSV(value: string): string {
   if (value.includes(',') || value.includes('"') || value.includes('\n')) {
@@ -37,12 +37,14 @@ export function exportToCSV(
 
 export function exportToJSON(
   habits: Record<string, Habit>,
-  entries: Record<DateKey, DailyEntry>
+  entries: Record<DateKey, DailyEntry>,
+  wishes?: Record<string, Wish>
 ): string {
   return JSON.stringify({
     version: '1.0',
     exportedAt: new Date().toISOString(),
     habits: Object.values(habits),
+    wishes: wishes ? Object.values(wishes) : [],
     entries: Object.values(entries).sort((a, b) => a.date.localeCompare(b.date)),
   }, null, 2);
 }
@@ -63,6 +65,10 @@ export function downloadCSV(habits: Record<string, Habit>, entries: Record<DateK
   downloadFile(exportToCSV(habits, entries), 'lifeflow-export.csv', 'text/csv;charset=utf-8;');
 }
 
-export function downloadJSON(habits: Record<string, Habit>, entries: Record<DateKey, DailyEntry>): void {
-  downloadFile(exportToJSON(habits, entries), 'lifeflow-export.json', 'application/json');
+export function downloadJSON(
+  habits: Record<string, Habit>,
+  entries: Record<DateKey, DailyEntry>,
+  wishes?: Record<string, Wish>
+): void {
+  downloadFile(exportToJSON(habits, entries, wishes), 'lifeflow-export.json', 'application/json');
 }

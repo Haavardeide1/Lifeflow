@@ -37,6 +37,7 @@ const PERIODS: { value: TimePeriod; label: string }[] = [
 export default function HomePage() {
   const habits = useLifeflowStore((s) => s.habits);
   const entries = useLifeflowStore((s) => s.entries);
+  const wishes = useLifeflowStore((s) => s.wishes);
   const selectedPeriod = useUIStore((s) => s.selectedPeriod);
   const setSelectedPeriod = useUIStore((s) => s.setSelectedPeriod);
   const user = useAuthStore((s) => s.user);
@@ -147,7 +148,7 @@ export default function HomePage() {
                   CSV
                 </button>
                 <button
-                  onClick={() => downloadJSON(habits, entries)}
+                  onClick={() => downloadJSON(habits, entries, wishes)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/70 hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors"
                 >
                   <Download size={12} />
