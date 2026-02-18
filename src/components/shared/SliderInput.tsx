@@ -26,7 +26,7 @@ export function SliderInput({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-[13px] font-medium text-white/70">{label}</label>
+        <label className="text-[13px] font-medium text-gray-600 dark:text-white/70">{label}</label>
         <span
           className="text-[20px] font-bold tabular-nums"
           style={{ color }}

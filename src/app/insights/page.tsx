@@ -54,7 +54,7 @@ export default function InsightsPage() {
             <CorrelationChart habits={habits} entries={entries} />
           </div>
           <div className="px-5 pb-4">
-            <p className="text-[11px] text-white/25">
+            <p className="text-[11px] text-gray-400 dark:text-white/25">
               Bars show Pearson correlation with your mood rating. Green = positive, Red = negative. Need 3+ days of data.
             </p>
           </div>
@@ -71,7 +71,7 @@ export default function InsightsPage() {
             <RadarChart habits={habits} entries={entries} period={selectedPeriod} />
           </div>
           <div className="px-5 pb-4">
-            <p className="text-[11px] text-white/25">
+            <p className="text-[11px] text-gray-400 dark:text-white/25">
               Good habits: bigger = more done. Bad habits: bigger = more avoided. Green area = your performance.
             </p>
           </div>
@@ -111,29 +111,29 @@ function SummaryStats({
   return (
     <div className="grid grid-cols-2 gap-4">
       <div>
-        <p className="text-[11px] text-white/30">Avg Health Score</p>
+        <p className="text-[11px] text-gray-400 dark:text-white/30">Avg Health Score</p>
         <p className="text-[20px] font-bold text-emerald-400">{avgScore.toFixed(1)}</p>
       </div>
       <div>
-        <p className="text-[11px] text-white/30">Best Day</p>
-        <p className="text-[14px] font-semibold text-white/80">{bestDay.date}</p>
+        <p className="text-[11px] text-gray-400 dark:text-white/30">Best Day</p>
+        <p className="text-[14px] font-semibold text-gray-700 dark:text-white/80">{bestDay.date}</p>
         <p className="text-[11px] text-emerald-400/60">Score: {bestDay.healthScore}</p>
       </div>
       <div>
-        <p className="text-[11px] text-white/30">Avg Mood</p>
+        <p className="text-[11px] text-gray-400 dark:text-white/30">Avg Mood</p>
         <p className="text-[18px] font-semibold text-blue-400">{avgMood.toFixed(1)}</p>
       </div>
       <div>
-        <p className="text-[11px] text-white/30">Avg Energy</p>
+        <p className="text-[11px] text-gray-400 dark:text-white/30">Avg Energy</p>
         <p className="text-[18px] font-semibold text-orange-400">{avgEnergy.toFixed(1)}</p>
       </div>
       <div>
-        <p className="text-[11px] text-white/30">Avg Sleep</p>
+        <p className="text-[11px] text-gray-400 dark:text-white/30">Avg Sleep</p>
         <p className="text-[18px] font-semibold text-purple-400">{avgSleep.toFixed(1)}</p>
       </div>
       <div>
-        <p className="text-[11px] text-white/30">Total Entries</p>
-        <p className="text-[18px] font-semibold text-white/70">{entryList.length}</p>
+        <p className="text-[11px] text-gray-400 dark:text-white/30">Total Entries</p>
+        <p className="text-[18px] font-semibold text-gray-600 dark:text-white/70">{entryList.length}</p>
       </div>
     </div>
   );

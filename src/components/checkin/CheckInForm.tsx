@@ -112,7 +112,7 @@ export function CheckInForm() {
         <div className="flex items-center justify-between">
           <button
             onClick={goToPrevDay}
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-white/50 hover:bg-white/[0.06] hover:text-white transition-colors"
+            className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-500 dark:text-white/50 hover:bg-gray-100 dark:hover:bg-white/[0.06] hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             <ChevronLeft size={20} />
           </button>
@@ -121,7 +121,7 @@ export function CheckInForm() {
               {isToday(checkinDate) ? 'Today' : formatDisplayDate(checkinDate)}
             </h1>
             {isToday(checkinDate) && (
-              <p className="text-[12px] text-white/40">{formatDisplayDate(checkinDate)}</p>
+              <p className="text-[12px] text-gray-400 dark:text-white/40">{formatDisplayDate(checkinDate)}</p>
             )}
             {isUpdate && (
               <p className="text-[11px] text-emerald-400/70 mt-0.5">Already checked in</p>
@@ -130,7 +130,7 @@ export function CheckInForm() {
           <button
             onClick={goToNextDay}
             disabled={isToday(checkinDate)}
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-white/50 hover:bg-white/[0.06] hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+            className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-500 dark:text-white/50 hover:bg-gray-100 dark:hover:bg-white/[0.06] hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
           >
             <ChevronRight size={20} />
           </button>
@@ -205,7 +205,7 @@ export function CheckInForm() {
               value={notes}
               onChange={(e) => { setNotes(e.target.value); setSaved(false); }}
               placeholder="Anything else to note about today?"
-              className="w-full bg-transparent text-[14px] text-white/80 placeholder:text-white/20 resize-none outline-none min-h-[80px]"
+              className="w-full bg-transparent text-[14px] text-gray-700 dark:text-white/80 placeholder:text-gray-300 dark:placeholder:text-white/20 resize-none outline-none min-h-[80px]"
               rows={3}
             />
           </div>

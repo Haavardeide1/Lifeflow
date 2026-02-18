@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Habit, DailyEntry, DateKey } from '@/types';
+import type { Habit, DailyEntry, DateKey, UserProfile, FriendPublicStats, FriendRequest } from '@/types';
 
 // ============================================================
 // LOAD all data for the current user
@@ -152,4 +152,213 @@ export async function deleteEntryCloud(userId: string, date: DateKey): Promise<v
     .eq('date', date);
 
   if (error) throw error;
+}
+
+// ============================================================
+// PROFILES
+// ============================================================
+
+export async function fetchProfile(userId: string): Promise<UserProfile | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, username, display_name, avatar_color, current_streak_days')
+    .eq('id', userId)
+    .single();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    username: data.username,
+    displayName: data.display_name,
+    avatarColor: data.avatar_color,
+    currentStreakDays: data.current_streak_days,
+  };
+}
+
+export async function upsertProfile(
+  userId: string,
+  updates: Partial<Pick<UserProfile, 'username' | 'displayName' | 'avatarColor' | 'currentStreakDays'>>
+): Promise<{ error: string | null }> {
+  const payload: Record<string, unknown> = {
+    id: userId,
+    updated_at: new Date().toISOString(),
+  };
+  if (updates.username !== undefined) payload.username = updates.username;
+  if (updates.displayName !== undefined) payload.display_name = updates.displayName;
+  if (updates.avatarColor !== undefined) payload.avatar_color = updates.avatarColor;
+  if (updates.currentStreakDays !== undefined) payload.current_streak_days = updates.currentStreakDays;
+
+  const { error } = await supabase
+    .from('profiles')
+    .upsert(payload, { onConflict: 'id' });
+
+  if (error) {
+    if (error.code === '23505') return { error: 'That username is already taken.' };
+    return { error: error.message };
+  }
+  return { error: null };
+}
+
+export async function searchProfileByUsername(username: string): Promise<UserProfile | null> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, username, display_name, avatar_color, current_streak_days')
+    .eq('username', username)
+    .single();
+
+  if (!data) return null;
+  return {
+    id: data.id,
+    username: data.username,
+    displayName: data.display_name,
+    avatarColor: data.avatar_color,
+    currentStreakDays: data.current_streak_days,
+  };
+}
+
+// ============================================================
+// FRIENDS
+// ============================================================
+
+export async function fetchFriendsList(userId: string): Promise<FriendPublicStats[]> {
+  // Get accepted friend rows (both directions)
+  const { data: friendRows } = await supabase
+    .from('friends')
+    .select('user_id, friend_id')
+    .eq('status', 'accepted')
+    .or(`user_id.eq.${userId},friend_id.eq.${userId}`);
+
+  if (!friendRows || friendRows.length === 0) return [];
+
+  // Deduplicate friend IDs
+  const friendIdSet = new Set<string>();
+  friendRows.forEach(r => {
+    const fid = r.user_id === userId ? r.friend_id : r.user_id;
+    friendIdSet.add(fid);
+  });
+  const friendIds = Array.from(friendIdSet);
+
+  // Get profiles for friends
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, username, display_name, avatar_color, current_streak_days')
+    .in('id', friendIds);
+
+  if (!profiles) return [];
+
+  // Get latest entry for each friend (health score + date)
+  const results: FriendPublicStats[] = [];
+  for (const p of profiles) {
+    const { data: latestEntry } = await supabase
+      .from('entries')
+      .select('health_score, date')
+      .eq('user_id', p.id)
+      .order('date', { ascending: false })
+      .limit(1)
+      .single();
+
+    results.push({
+      userId: p.id,
+      username: p.username || 'unknown',
+      displayName: p.display_name,
+      avatarColor: p.avatar_color,
+      currentStreakDays: p.current_streak_days,
+      latestHealthScore: latestEntry?.health_score ? Number(latestEntry.health_score) : null,
+      lastCheckinDate: latestEntry?.date || null,
+    });
+  }
+
+  return results;
+}
+
+export async function fetchPendingRequests(userId: string): Promise<FriendRequest[]> {
+  // Requests where I am the recipient
+  const { data } = await supabase
+    .from('friends')
+    .select('id, user_id, friend_id, status, created_at')
+    .eq('friend_id', userId)
+    .eq('status', 'pending');
+
+  if (!data || data.length === 0) return [];
+
+  // Get sender profiles
+  const senderIds = data.map(r => r.user_id);
+  const { data: senderProfiles } = await supabase
+    .from('profiles')
+    .select('id, username, avatar_color')
+    .in('id', senderIds);
+
+  const profileMap = new Map<string, { username: string | null; avatar_color: string }>();
+  senderProfiles?.forEach(p => profileMap.set(p.id, p));
+
+  return data.map(r => {
+    const sender = profileMap.get(r.user_id);
+    return {
+      id: r.id,
+      userId: r.user_id,
+      friendId: r.friend_id,
+      status: r.status as 'pending',
+      createdAt: r.created_at,
+      senderUsername: sender?.username || undefined,
+      senderAvatarColor: sender?.avatar_color || undefined,
+    };
+  });
+}
+
+export async function sendFriendRequest(
+  fromUserId: string,
+  toUserId: string
+): Promise<{ error: string | null }> {
+  // Check if already friends or pending
+  const { data: existing } = await supabase
+    .from('friends')
+    .select('id, status')
+    .or(`and(user_id.eq.${fromUserId},friend_id.eq.${toUserId}),and(user_id.eq.${toUserId},friend_id.eq.${fromUserId})`)
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    if (existing[0].status === 'accepted') return { error: 'Already friends!' };
+    return { error: 'Friend request already pending.' };
+  }
+
+  const { error } = await supabase
+    .from('friends')
+    .insert({ user_id: fromUserId, friend_id: toUserId, status: 'pending' });
+
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+export async function acceptFriendRequest(
+  requestId: string,
+  currentUserId: string,
+  requestFromUserId: string
+): Promise<{ error: string | null }> {
+  // Update request to accepted
+  const { error: e1 } = await supabase
+    .from('friends')
+    .update({ status: 'accepted' })
+    .eq('id', requestId);
+
+  if (e1) return { error: e1.message };
+
+  // Insert reverse row so both see each other
+  const { error: e2 } = await supabase
+    .from('friends')
+    .insert({ user_id: currentUserId, friend_id: requestFromUserId, status: 'accepted' });
+
+  if (e2 && e2.code !== '23505') return { error: e2.message };
+  return { error: null };
+}
+
+export async function declineFriendRequest(requestId: string): Promise<void> {
+  await supabase.from('friends').delete().eq('id', requestId);
+}
+
+export async function removeFriend(userId: string, friendId: string): Promise<void> {
+  await supabase
+    .from('friends')
+    .delete()
+    .or(`and(user_id.eq.${userId},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${userId})`);
 }

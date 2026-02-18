@@ -32,7 +32,7 @@ export function QuickCheckinCTA() {
       <ClipboardCheck size={20} />
       <div>
         <p className="text-[14px] font-semibold">Check in for today</p>
-        <p className="text-[12px] text-white/60">How was your day?</p>
+        <p className="text-[12px] text-white/70">How was your day?</p>
       </div>
     </Link>
   );

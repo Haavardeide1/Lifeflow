@@ -16,15 +16,15 @@ interface PeriodSelectorProps {
 
 export function PeriodSelector({ value, onChange }: PeriodSelectorProps) {
   return (
-    <div className="flex gap-1 bg-white/[0.03] rounded-lg p-1">
+    <div className="flex gap-1 bg-gray-100 dark:bg-white/[0.03] rounded-lg p-1">
       {PERIODS.map(p => (
         <button
           key={p.value}
           onClick={() => onChange(p.value)}
           className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors ${
             value === p.value
-              ? 'bg-white/10 text-white'
-              : 'text-white/30 hover:text-white/50'
+              ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm'
+              : 'text-gray-400 dark:text-white/30 hover:text-gray-500 dark:hover:text-white/50'
           }`}
         >
           {p.label}

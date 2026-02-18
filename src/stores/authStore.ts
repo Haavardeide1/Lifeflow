@@ -30,17 +30,34 @@ export const useAuthStore = create<AuthState>((set) => ({
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { error: error.message };
     set({ user: data.user });
+    // Kick off profile load
+    if (data.user) {
+      import('@/stores/profileStore').then(({ useProfileStore }) => {
+        useProfileStore.getState().fetchProfile(data.user!.id);
+      });
+    }
     return { error: null };
   },
 
   signOut: async () => {
     await supabase.auth.signOut();
     set({ user: null });
+    // Reset profile state
+    import('@/stores/profileStore').then(({ useProfileStore }) => {
+      useProfileStore.getState().reset();
+    });
   },
 
   initialize: async () => {
     const { data: { session } } = await supabase.auth.getSession();
     set({ user: session?.user ?? null, loading: false });
+
+    // Load profile if already logged in
+    if (session?.user) {
+      import('@/stores/profileStore').then(({ useProfileStore }) => {
+        useProfileStore.getState().fetchProfile(session.user.id);
+      });
+    }
 
     supabase.auth.onAuthStateChange((_event, session) => {
       set({ user: session?.user ?? null });

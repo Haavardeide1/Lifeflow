@@ -122,7 +122,7 @@ export function TrendLines({ entries, period }: TrendLinesProps) {
 
   if (dataPoints.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[240px] text-white/30 text-[13px]">
+      <div className="flex items-center justify-center h-[240px] text-gray-400 dark:text-white/30 text-[13px]">
         No data for this period.
       </div>
     );

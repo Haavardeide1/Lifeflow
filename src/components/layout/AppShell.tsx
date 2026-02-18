@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { Sidebar } from './Sidebar';
+import { ThemeProvider } from './ThemeProvider';
 import { usePersistence } from '@/hooks/usePersistence';
 import { useAuthStore } from '@/stores/authStore';
 import { AuthScreen } from '@/components/auth/AuthScreen';
@@ -19,27 +20,38 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-gray-950 text-white items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center mx-auto mb-3 animate-pulse">
-            <span className="text-white font-bold text-xl">L</span>
+      <>
+        <ThemeProvider />
+        <div className="flex h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center mx-auto mb-3 animate-pulse">
+              <span className="text-white font-bold text-xl">L</span>
+            </div>
+            <p className="text-[13px] text-gray-400 dark:text-white/40">Loading...</p>
           </div>
-          <p className="text-[13px] text-white/40">Loading...</p>
         </div>
-      </div>
+      </>
     );
   }
 
   if (!user) {
-    return <AuthScreen />;
+    return (
+      <>
+        <ThemeProvider />
+        <AuthScreen />
+      </>
+    );
   }
 
   return (
-    <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
-      <Sidebar />
-      <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
-        {children}
-      </main>
-    </div>
+    <>
+      <ThemeProvider />
+      <div className="flex h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white overflow-hidden">
+        <Sidebar />
+        <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
+          {children}
+        </main>
+      </div>
+    </>
   );
 }

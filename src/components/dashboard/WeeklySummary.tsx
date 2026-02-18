@@ -75,10 +75,10 @@ export function WeeklySummary() {
   if (!summary) return null;
 
   const TrendIcon = ({ delta }: { delta: number | null }) => {
-    if (delta === null) return <Minus size={14} className="text-white/20" />;
+    if (delta === null) return <Minus size={14} className="text-gray-300 dark:text-white/20" />;
     if (delta > 0.3) return <TrendingUp size={14} className="text-emerald-400" />;
     if (delta < -0.3) return <TrendingDown size={14} className="text-red-400" />;
-    return <Minus size={14} className="text-white/30" />;
+    return <Minus size={14} className="text-gray-400 dark:text-white/30" />;
   };
 
   const deltaText = (delta: number | null) => {
@@ -92,26 +92,26 @@ export function WeeklySummary() {
       <div className="px-5 py-4 grid grid-cols-2 gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <p className="text-[11px] text-white/30">Avg Score</p>
+            <p className="text-[11px] text-gray-400 dark:text-white/30">Avg Score</p>
             <TrendIcon delta={summary.scoreDelta} />
           </div>
           <p className="text-[22px] font-bold text-emerald-400">{summary.thisAvgScore.toFixed(1)}</p>
-          <p className="text-[10px] text-white/25">{deltaText(summary.scoreDelta)}</p>
+          <p className="text-[10px] text-gray-400 dark:text-white/25">{deltaText(summary.scoreDelta)}</p>
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <p className="text-[11px] text-white/30">Avg Mood</p>
+            <p className="text-[11px] text-gray-400 dark:text-white/30">Avg Mood</p>
             <TrendIcon delta={summary.moodDelta} />
           </div>
           <p className="text-[22px] font-bold text-blue-400">{summary.thisAvgMood.toFixed(1)}</p>
-          <p className="text-[10px] text-white/25">{deltaText(summary.moodDelta)}</p>
+          <p className="text-[10px] text-gray-400 dark:text-white/25">{deltaText(summary.moodDelta)}</p>
         </div>
         <div>
-          <p className="text-[11px] text-white/30">Good Habits Done</p>
+          <p className="text-[11px] text-gray-400 dark:text-white/30">Good Habits Done</p>
           <p className="text-[18px] font-semibold text-emerald-400">{summary.goodRate}%</p>
         </div>
         <div>
-          <p className="text-[11px] text-white/30">Bad Habits Avoided</p>
+          <p className="text-[11px] text-gray-400 dark:text-white/30">Bad Habits Avoided</p>
           <p className="text-[18px] font-semibold text-orange-400">{summary.avoidRate}%</p>
         </div>
       </div>

@@ -106,7 +106,7 @@ export function CorrelationChart({ habits, entries }: CorrelationChartProps) {
 
   if (correlations.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[200px] text-white/30 text-[13px]">
+      <div className="flex items-center justify-center h-[200px] text-gray-400 dark:text-white/30 text-[13px]">
         Need at least 3 days of data to show correlations.
       </div>
     );

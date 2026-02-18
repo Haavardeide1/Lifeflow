@@ -106,3 +106,39 @@ export interface HistoryEntry {
 // ============================================================
 
 export type TimePeriod = '7d' | '30d' | '90d' | 'all';
+
+export type Theme = 'dark' | 'light';
+
+// ============================================================
+// PROFILE & FRIENDS
+// ============================================================
+
+export interface UserProfile {
+  id: string;
+  username: string | null;
+  displayName: string | null;
+  avatarColor: string;
+  currentStreakDays: number;
+}
+
+export type FriendStatus = 'pending' | 'accepted';
+
+export interface FriendRequest {
+  id: string;
+  userId: string;
+  friendId: string;
+  status: FriendStatus;
+  createdAt: string;
+  senderUsername?: string;
+  senderAvatarColor?: string;
+}
+
+export interface FriendPublicStats {
+  userId: string;
+  username: string;
+  displayName: string | null;
+  avatarColor: string;
+  currentStreakDays: number;
+  latestHealthScore: number | null;
+  lastCheckinDate: string | null;
+}

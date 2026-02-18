@@ -101,7 +101,7 @@ export function HabitHeatmap({ habits, entries, period }: HabitHeatmapProps) {
 
   if (activeHabits.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[100px] text-white/30 text-[13px]">
+      <div className="flex items-center justify-center h-[100px] text-gray-400 dark:text-white/30 text-[13px]">
         No active habits.
       </div>
     );

@@ -44,17 +44,17 @@ export function HabitList() {
   const renderHabitRow = (habit: Habit) => (
     <div
       key={habit.id}
-      className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors"
+      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors"
     >
       <div
         className="w-9 h-9 rounded-lg flex items-center justify-center"
         style={{ backgroundColor: `${habit.color}20` }}
       >
-        <HabitIcon icon={habit.icon} size={16} className="text-white/70" />
+        <HabitIcon icon={habit.icon} size={16} className="text-gray-600 dark:text-white/70" />
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-[14px] font-medium text-white/90 truncate">{habit.name}</p>
+        <p className="text-[14px] font-medium text-gray-800 dark:text-white/90 truncate">{habit.name}</p>
         <div className="flex items-center gap-2 mt-0.5">
           <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded ${
             habit.type === 'good'
@@ -63,7 +63,7 @@ export function HabitList() {
           }`}>
             {habit.type}
           </span>
-          <span className="text-[11px] text-white/30">
+          <span className="text-[11px] text-gray-400 dark:text-white/30">
             weight: {habit.weight}/10
           </span>
         </div>
@@ -71,7 +71,7 @@ export function HabitList() {
 
       <div className="flex items-center gap-1">
         {/* Weight bar */}
-        <div className="w-16 h-1.5 rounded-full bg-white/[0.06] overflow-hidden mr-2">
+        <div className="w-16 h-1.5 rounded-full bg-gray-100 dark:bg-white/[0.06] overflow-hidden mr-2">
           <div
             className="h-full rounded-full"
             style={{
@@ -83,13 +83,13 @@ export function HabitList() {
 
         <button
           onClick={() => setEditingHabit(habit)}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-colors"
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/70 hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors"
         >
           <Pencil size={14} />
         </button>
         <button
           onClick={() => deleteHabit(habit.id)}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 dark:text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
           title="Archive"
         >
           <Archive size={14} />
@@ -116,12 +116,12 @@ export function HabitList() {
         {activeHabits.length === 0 && archivedHabits.length === 0 && (
           <Card>
             <div className="px-5 py-8 text-center">
-              <h3 className="text-[16px] font-semibold text-white/80 mb-2">Get started</h3>
-              <p className="text-[13px] text-white/40 max-w-sm mx-auto mb-5">
+              <h3 className="text-[16px] font-semibold text-gray-700 dark:text-white/80 mb-2">Get started</h3>
+              <p className="text-[13px] text-gray-400 dark:text-white/40 max-w-sm mx-auto mb-5">
                 Add the habits you want to track. Think about what makes you feel good and what drags you down.
               </p>
               <div className="text-left max-w-xs mx-auto mb-6 space-y-2">
-                <p className="text-[12px] text-white/30 uppercase tracking-wider font-medium">Ideas</p>
+                <p className="text-[12px] text-gray-400 dark:text-white/30 uppercase tracking-wider font-medium">Ideas</p>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { label: 'Exercise', type: 'good' },
@@ -157,7 +157,7 @@ export function HabitList() {
         {/* Good Habits */}
         {goodHabits.length > 0 && (
           <Card title={`Good Habits (${goodHabits.length})`}>
-            <div className="divide-y divide-white/[0.04]">
+            <div className="divide-y divide-gray-200 dark:divide-white/[0.04]">
               {goodHabits.map(renderHabitRow)}
             </div>
           </Card>
@@ -166,7 +166,7 @@ export function HabitList() {
         {/* Bad Habits */}
         {badHabits.length > 0 && (
           <Card title={`Bad Habits (${badHabits.length})`}>
-            <div className="divide-y divide-white/[0.04]">
+            <div className="divide-y divide-gray-200 dark:divide-white/[0.04]">
               {badHabits.map(renderHabitRow)}
             </div>
           </Card>
@@ -177,23 +177,23 @@ export function HabitList() {
           <div>
             <button
               onClick={() => setShowArchived(!showArchived)}
-              className="flex items-center gap-2 text-[13px] text-white/40 hover:text-white/60 transition-colors"
+              className="flex items-center gap-2 text-[13px] text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/60 transition-colors"
             >
               {showArchived ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               Archived ({archivedHabits.length})
             </button>
             {showArchived && (
               <Card className="mt-3">
-                <div className="divide-y divide-white/[0.04]">
+                <div className="divide-y divide-gray-200 dark:divide-white/[0.04]">
                   {archivedHabits.map(habit => (
                     <div key={habit.id} className="flex items-center gap-3 px-4 py-3 opacity-50">
-                      <div className="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center">
-                        <HabitIcon icon={habit.icon} size={16} className="text-white/40" />
+                      <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-white/[0.04] flex items-center justify-center">
+                        <HabitIcon icon={habit.icon} size={16} className="text-gray-400 dark:text-white/40" />
                       </div>
-                      <span className="flex-1 text-[14px] text-white/50">{habit.name}</span>
+                      <span className="flex-1 text-[14px] text-gray-500 dark:text-white/50">{habit.name}</span>
                       <button
                         onClick={() => handleRestore(habit.id)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors"
                       >
                         <RotateCcw size={12} />
                         Restore

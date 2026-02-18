@@ -160,7 +160,7 @@ export function HealthScoreGraph({ entries, period }: HealthScoreGraphProps) {
 
   if (dataPoints.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[280px] text-white/30 text-[14px]">
+      <div className="flex items-center justify-center h-[280px] text-gray-400 dark:text-white/30 text-[14px]">
         No entries yet. Start by checking in today.
       </div>
     );
@@ -171,14 +171,14 @@ export function HealthScoreGraph({ entries, period }: HealthScoreGraphProps) {
       <svg ref={svgRef} className="w-full" />
       {tooltip && (
         <div
-          className="absolute pointer-events-none bg-[#1c1c24] border border-white/10 rounded-lg px-3 py-2 shadow-xl z-10"
+          className="absolute pointer-events-none bg-white dark:bg-[#1c1c24] border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 shadow-xl z-10"
           style={{
             left: tooltip.x,
             top: tooltip.y - 80,
             transform: 'translateX(-50%)',
           }}
         >
-          <p className="text-[11px] text-white/50">{formatShortDate(tooltip.entry.date)}</p>
+          <p className="text-[11px] text-gray-500 dark:text-white/50">{formatShortDate(tooltip.entry.date)}</p>
           <p className="text-[16px] font-bold text-emerald-400">{tooltip.entry.healthScore}</p>
           <div className="flex gap-3 mt-1">
             <span className="text-[10px] text-blue-400">Mood {tooltip.entry.mood}</span>

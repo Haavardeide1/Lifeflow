@@ -30,25 +30,25 @@ export function StreakCards() {
           return (
             <div
               key={streak.habitId}
-              className="flex-shrink-0 w-32 rounded-xl bg-white/[0.03] border border-white/[0.06] p-3"
+              className="flex-shrink-0 w-32 rounded-xl bg-gray-100 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] p-3"
             >
               <div className="flex items-center gap-2 mb-2">
-                <HabitIcon icon={habit.icon} size={14} className="text-white/50" />
-                <span className="text-[11px] text-white/50 truncate">{habit.name}</span>
+                <HabitIcon icon={habit.icon} size={14} className="text-gray-500 dark:text-white/50" />
+                <span className="text-[11px] text-gray-500 dark:text-white/50 truncate">{habit.name}</span>
               </div>
 
               <div className="flex items-baseline gap-1">
                 {streak.currentStreak > 0 && (
                   <Flame size={14} className="text-orange-400" />
                 )}
-                <span className="text-[22px] font-bold text-white">
+                <span className="text-[22px] font-bold text-gray-900 dark:text-white">
                   {streak.currentStreak}
                 </span>
-                <span className="text-[11px] text-white/30">days</span>
+                <span className="text-[11px] text-gray-400 dark:text-white/30">days</span>
               </div>
 
               {streak.longestStreak > streak.currentStreak && (
-                <p className="text-[10px] text-white/25 mt-1">
+                <p className="text-[10px] text-gray-400 dark:text-white/25 mt-1">
                   Best: {streak.longestStreak} days
                 </p>
               )}

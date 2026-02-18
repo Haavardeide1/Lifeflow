@@ -38,14 +38,14 @@ export default function DashboardPage() {
             <div className="flex gap-1">
               <button
                 onClick={() => downloadCSV(habits, entries)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-white/40 hover:text-white/70 hover:bg-white/[0.06] transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/70 hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors"
               >
                 <Download size={12} />
                 CSV
               </button>
               <button
                 onClick={() => downloadJSON(habits, entries)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-white/40 hover:text-white/70 hover:bg-white/[0.06] transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/70 hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors"
               >
                 <Download size={12} />
                 JSON
@@ -70,8 +70,8 @@ export default function DashboardPage() {
                       onClick={() => setSelectedPeriod(p.value)}
                       className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
                         selectedPeriod === p.value
-                          ? 'bg-white/10 text-white'
-                          : 'text-white/30 hover:text-white/50'
+                          ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm'
+                          : 'text-gray-400 dark:text-white/30 hover:text-gray-500 dark:hover:text-white/50'
                       }`}
                     >
                       {p.label}

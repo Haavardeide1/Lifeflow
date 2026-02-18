@@ -21,7 +21,7 @@ export function HabitToggle({ habit, completed, onToggle }: HabitToggleProps) {
           ? isGood
             ? 'bg-emerald-500/15 border border-emerald-500/30'
             : 'bg-red-500/15 border border-red-500/30'
-          : 'bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06]'
+          : 'bg-gray-100 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] hover:bg-gray-100 dark:hover:bg-white/[0.06]'
         }
       `}
     >
@@ -30,7 +30,7 @@ export function HabitToggle({ habit, completed, onToggle }: HabitToggleProps) {
           w-8 h-8 rounded-lg flex items-center justify-center transition-colors
           ${completed
             ? isGood ? 'bg-emerald-500/20' : 'bg-red-500/20'
-            : 'bg-white/[0.06]'
+            : 'bg-gray-100 dark:bg-white/[0.06]'
           }
         `}
       >
@@ -39,17 +39,17 @@ export function HabitToggle({ habit, completed, onToggle }: HabitToggleProps) {
           size={16}
           className={completed
             ? isGood ? 'text-emerald-400' : 'text-red-400'
-            : 'text-white/40'
+            : 'text-gray-400 dark:text-white/40'
           }
         />
       </div>
 
-      <span className={`flex-1 text-left text-[14px] ${completed ? 'text-white' : 'text-white/60'}`}>
+      <span className={`flex-1 text-left text-[14px] ${completed ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-white/60'}`}>
         {habit.name}
       </span>
 
       <div className="flex items-center gap-2">
-        <span className="text-[11px] text-white/30 font-medium">
+        <span className="text-[11px] text-gray-400 dark:text-white/30 font-medium">
           {habit.weight}/10
         </span>
         <div
@@ -59,7 +59,7 @@ export function HabitToggle({ habit, completed, onToggle }: HabitToggleProps) {
               ? isGood
                 ? 'bg-emerald-500 border-emerald-500'
                 : 'bg-red-500 border-red-500'
-              : 'border-white/20'
+              : 'border-gray-300 dark:border-white/20'
             }
           `}
         >

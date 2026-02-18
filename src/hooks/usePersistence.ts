@@ -4,7 +4,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useLifeflowStore } from '@/stores/lifeflowStore';
 import { useAuthStore } from '@/stores/authStore';
 import { autoSave, loadAutoSave } from '@/lib/database';
-import { loadUserData, upsertHabit, upsertEntry } from '@/lib/supabaseSync';
+import { loadUserData, upsertHabit, upsertEntry, upsertProfile } from '@/lib/supabaseSync';
+import { calculateAllStreaks } from '@/lib/streaks';
 
 const SYNC_DELAY = 2000;
 
@@ -114,6 +115,15 @@ export function usePersistence() {
                 console.error('Failed to sync entry:', e);
               }
             }
+          }
+
+          // Update streak count on profile
+          try {
+            const allStreaks = calculateAllStreaks(habits, entries);
+            const maxStreak = Math.max(0, ...allStreaks.map(s => s.currentStreak));
+            await upsertProfile(user.id, { currentStreakDays: maxStreak });
+          } catch {
+            // Non-critical, ignore
           }
         }
 

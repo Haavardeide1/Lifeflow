@@ -35,7 +35,7 @@ export function AuthScreen() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-950 text-white items-center justify-center px-4">
+    <div className="flex h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -43,24 +43,24 @@ export function AuthScreen() {
             <span className="text-white font-bold text-2xl">L</span>
           </div>
           <h1 className="text-[22px] font-bold">Lifeflow</h1>
-          <p className="text-[13px] text-white/40 mt-1">Track your habits. Understand yourself.</p>
+          <p className="text-[13px] text-gray-400 dark:text-white/40 mt-1">Track your habits. Understand yourself.</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-[12px] font-medium text-white/50 uppercase tracking-wider">Email</label>
+            <label className="text-[12px] font-medium text-gray-500 dark:text-white/50 uppercase tracking-wider">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
-              className="mt-1.5 w-full px-3.5 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[14px] text-white placeholder:text-white/20 outline-none focus:border-white/20 transition-colors"
+              className="mt-1.5 w-full px-3.5 py-2.5 rounded-lg bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] text-[14px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/20 outline-none focus:border-gray-400 dark:focus:border-white/20 transition-colors"
             />
           </div>
           <div>
-            <label className="text-[12px] font-medium text-white/50 uppercase tracking-wider">Password</label>
+            <label className="text-[12px] font-medium text-gray-500 dark:text-white/50 uppercase tracking-wider">Password</label>
             <input
               type="password"
               value={password}
@@ -68,7 +68,7 @@ export function AuthScreen() {
               placeholder="At least 6 characters"
               required
               minLength={6}
-              className="mt-1.5 w-full px-3.5 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[14px] text-white placeholder:text-white/20 outline-none focus:border-white/20 transition-colors"
+              className="mt-1.5 w-full px-3.5 py-2.5 rounded-lg bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] text-[14px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/20 outline-none focus:border-gray-400 dark:focus:border-white/20 transition-colors"
             />
           </div>
 
@@ -89,7 +89,7 @@ export function AuthScreen() {
         </form>
 
         {/* Toggle */}
-        <p className="text-center text-[13px] text-white/40 mt-5">
+        <p className="text-center text-[13px] text-gray-400 dark:text-white/40 mt-5">
           {mode === 'signin' ? (
             <>
               Don&apos;t have an account?{' '}

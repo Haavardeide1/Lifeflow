@@ -133,7 +133,7 @@ export function RadarChart({ habits, entries, period }: RadarChartProps) {
 
   if (data.length < 3) {
     return (
-      <div className="flex items-center justify-center h-[200px] text-white/30 text-[13px]">
+      <div className="flex items-center justify-center h-[200px] text-gray-400 dark:text-white/30 text-[13px]">
         Need at least 3 habits to show radar chart.
       </div>
     );
