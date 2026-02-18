@@ -67,10 +67,6 @@ export default function HomePage() {
           </div>
 
           <div className="relative">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 mb-5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              Habit & Mood Tracker
-            </div>
             <div className="w-18 h-18 w-[78px] h-[78px] rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center mx-auto mb-5 shadow-xl shadow-emerald-500/30 animate-float">
               <Mountain size={34} className="text-white" />
             </div>
@@ -336,9 +332,14 @@ export default function HomePage() {
           <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-4" />
           <div className="flex flex-col items-center gap-2 text-center">
             <p className="text-[12px] text-gray-400 dark:text-white/35">
-              Created and powered by Claude and Codex
+              Created and powered by
             </p>
             <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                <span className="text-[11px] text-white/70">Claude</span>
+                <span className="w-px h-3 bg-white/15" />
+                <span className="text-[11px] text-white/70">OpenAI</span>
+              </div>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/80 to-emerald-400/40 flex items-center justify-center shadow-lg shadow-emerald-500/20">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                   <path d="M6 12.5c2.2-2.9 5.2-4.4 9-4.5M6 16.5c2.2-2.9 5.2-4.4 9-4.5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
