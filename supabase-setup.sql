@@ -61,11 +61,39 @@ create table public.wishes (
   updated_at timestamptz not null default now()
 );
 
+-- 3c. Social statuses
+create table public.status_updates (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  body text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.status_comments (
+  id uuid primary key default gen_random_uuid(),
+  status_id uuid references public.status_updates(id) on delete cascade not null,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  body text not null,
+  created_at timestamptz not null default now()
+);
+
+create table public.status_kudos (
+  id uuid primary key default gen_random_uuid(),
+  status_id uuid references public.status_updates(id) on delete cascade not null,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  created_at timestamptz not null default now(),
+  unique(status_id, user_id)
+);
+
 -- 4. Row Level Security (each user only sees their own data)
 alter table public.habits enable row level security;
 alter table public.entries enable row level security;
 alter table public.habit_completions enable row level security;
 alter table public.wishes enable row level security;
+alter table public.status_updates enable row level security;
+alter table public.status_comments enable row level security;
+alter table public.status_kudos enable row level security;
 
 -- Habits: users can CRUD their own
 create policy "Users can view own habits" on public.habits
@@ -85,6 +113,98 @@ create policy "Users can insert own wishes" on public.wishes
 create policy "Users can update own wishes" on public.wishes
   for update using (auth.uid() = user_id);
 create policy "Users can delete own wishes" on public.wishes
+  for delete using (auth.uid() = user_id);
+
+-- Status updates: users can view own + friends
+create policy "Users can view own or friends status" on public.status_updates
+  for select using (
+    auth.uid() = user_id
+    or exists (
+      select 1 from public.friends
+      where friends.user_id = auth.uid()
+        and friends.friend_id = status_updates.user_id
+        and friends.status = 'accepted'
+    )
+  );
+create policy "Users can insert own status" on public.status_updates
+  for insert with check (auth.uid() = user_id);
+create policy "Users can update own status" on public.status_updates
+  for update using (auth.uid() = user_id);
+create policy "Users can delete own status" on public.status_updates
+  for delete using (auth.uid() = user_id);
+
+-- Status comments: users can view/comment if status is visible to them
+create policy "Users can view comments on visible status" on public.status_comments
+  for select using (
+    exists (
+      select 1 from public.status_updates su
+      where su.id = status_comments.status_id
+        and (
+          su.user_id = auth.uid()
+          or exists (
+            select 1 from public.friends
+            where friends.user_id = auth.uid()
+              and friends.friend_id = su.user_id
+              and friends.status = 'accepted'
+          )
+        )
+    )
+  );
+create policy "Users can insert own comments on visible status" on public.status_comments
+  for insert with check (
+    auth.uid() = user_id
+    and exists (
+      select 1 from public.status_updates su
+      where su.id = status_comments.status_id
+        and (
+          su.user_id = auth.uid()
+          or exists (
+            select 1 from public.friends
+            where friends.user_id = auth.uid()
+              and friends.friend_id = su.user_id
+              and friends.status = 'accepted'
+          )
+        )
+    )
+  );
+create policy "Users can delete own comments" on public.status_comments
+  for delete using (auth.uid() = user_id);
+
+-- Status kudos: users can view/add/remove if status is visible to them
+create policy "Users can view kudos on visible status" on public.status_kudos
+  for select using (
+    exists (
+      select 1 from public.status_updates su
+      where su.id = status_kudos.status_id
+        and (
+          su.user_id = auth.uid()
+          or exists (
+            select 1 from public.friends
+            where friends.user_id = auth.uid()
+              and friends.friend_id = su.user_id
+              and friends.status = 'accepted'
+          )
+        )
+    )
+  );
+create policy "Users can add kudos on visible status" on public.status_kudos
+  for insert with check (
+    auth.uid() = user_id
+    and exists (
+      select 1 from public.status_updates su
+      where su.id = status_kudos.status_id
+        and (
+          su.user_id = auth.uid()
+          or exists (
+            select 1 from public.friends
+            where friends.user_id = auth.uid()
+              and friends.friend_id = su.user_id
+              and friends.status = 'accepted'
+          )
+        )
+    )
+  );
+create policy "Users can delete own kudos" on public.status_kudos
   for delete using (auth.uid() = user_id);
 
 -- Entries: users can CRUD their own
@@ -120,6 +240,10 @@ create index idx_habits_user_id on public.habits(user_id);
 create index idx_entries_user_id_date on public.entries(user_id, date);
 create index idx_habit_completions_entry_id on public.habit_completions(entry_id);
 create index idx_wishes_user_id on public.wishes(user_id);
+create index idx_status_updates_user_id on public.status_updates(user_id);
+create index idx_status_updates_created_at on public.status_updates(created_at);
+create index idx_status_comments_status_id on public.status_comments(status_id);
+create index idx_status_kudos_status_id on public.status_kudos(status_id);
 
 -- =============================================
 -- Optional: if you already created tables before adding new columns

@@ -1,5 +1,16 @@
 import { supabase } from './supabase';
-import type { Habit, DailyEntry, DateKey, UserProfile, FriendPublicStats, FriendRequest, Wish } from '@/types';
+import type {
+  Habit,
+  DailyEntry,
+  DateKey,
+  UserProfile,
+  FriendPublicStats,
+  FriendRequest,
+  Wish,
+  StatusUpdate,
+  StatusComment,
+  StatusKudo,
+} from '@/types';
 
 // ============================================================
 // LOAD all data for the current user
@@ -458,4 +469,111 @@ export async function removeFriend(userId: string, friendId: string): Promise<vo
     .from('friends')
     .delete()
     .or(`and(user_id.eq.${userId},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${userId})`);
+}
+
+// ============================================================
+// SOCIAL STATUS
+// ============================================================
+
+export async function fetchStatusUpdates(userIds: string[]): Promise<StatusUpdate[]> {
+  if (userIds.length === 0) return [];
+  const { data, error } = await supabase
+    .from('status_updates')
+    .select('id, user_id, body, created_at, updated_at, profiles:profiles!status_updates_user_id_fkey(username, display_name, avatar_color)')
+    .in('user_id', userIds)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    body: row.body,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    username: row.profiles?.username ?? null,
+    displayName: row.profiles?.display_name ?? null,
+    avatarColor: row.profiles?.avatar_color ?? null,
+  }));
+}
+
+export async function createStatusUpdate(userId: string, body: string): Promise<void> {
+  const { error } = await supabase
+    .from('status_updates')
+    .insert({ user_id: userId, body });
+  if (error) throw error;
+}
+
+export async function fetchStatusComments(statusIds: string[]): Promise<StatusComment[]> {
+  if (statusIds.length === 0) return [];
+  const { data, error } = await supabase
+    .from('status_comments')
+    .select('id, status_id, user_id, body, created_at, profiles:profiles!status_comments_user_id_fkey(username, display_name, avatar_color)')
+    .in('status_id', statusIds)
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    statusId: row.status_id,
+    userId: row.user_id,
+    body: row.body,
+    createdAt: row.created_at,
+    username: row.profiles?.username ?? null,
+    displayName: row.profiles?.display_name ?? null,
+    avatarColor: row.profiles?.avatar_color ?? null,
+  }));
+}
+
+export async function createStatusComment(statusId: string, userId: string, body: string): Promise<void> {
+  const { error } = await supabase
+    .from('status_comments')
+    .insert({ status_id: statusId, user_id: userId, body });
+  if (error) throw error;
+}
+
+export async function fetchStatusKudos(statusIds: string[]): Promise<StatusKudo[]> {
+  if (statusIds.length === 0) return [];
+  const { data, error } = await supabase
+    .from('status_kudos')
+    .select('id, status_id, user_id, created_at, profiles:profiles!status_kudos_user_id_fkey(username, display_name, avatar_color)')
+    .in('status_id', statusIds)
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    statusId: row.status_id,
+    userId: row.user_id,
+    createdAt: row.created_at,
+    username: row.profiles?.username ?? null,
+    displayName: row.profiles?.display_name ?? null,
+    avatarColor: row.profiles?.avatar_color ?? null,
+  }));
+}
+
+export async function toggleStatusKudo(statusId: string, userId: string): Promise<void> {
+  const { data: existing, error: fetchError } = await supabase
+    .from('status_kudos')
+    .select('id')
+    .eq('status_id', statusId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (fetchError) throw fetchError;
+
+  if (existing?.id) {
+    const { error } = await supabase
+      .from('status_kudos')
+      .delete()
+      .eq('id', existing.id);
+    if (error) throw error;
+  } else {
+    const { error } = await supabase
+      .from('status_kudos')
+      .insert({ status_id: statusId, user_id: userId });
+    if (error) throw error;
+  }
 }

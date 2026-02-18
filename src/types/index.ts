@@ -178,3 +178,39 @@ export interface FriendPublicStats {
   latestHealthScore: number | null;
   lastCheckinDate: string | null;
 }
+
+// ============================================================
+// SOCIAL STATUS
+// ============================================================
+
+export interface StatusUpdate {
+  id: string;
+  userId: string;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+  username?: string | null;
+  displayName?: string | null;
+  avatarColor?: string | null;
+}
+
+export interface StatusComment {
+  id: string;
+  statusId: string;
+  userId: string;
+  body: string;
+  createdAt: string;
+  username?: string | null;
+  displayName?: string | null;
+  avatarColor?: string | null;
+}
+
+export interface StatusKudo {
+  id: string;
+  statusId: string;
+  userId: string;
+  createdAt: string;
+  username?: string | null;
+  displayName?: string | null;
+  avatarColor?: string | null;
+}
