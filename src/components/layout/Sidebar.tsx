@@ -11,8 +11,10 @@ import {
   Trash2,
   X,
   AlertTriangle,
+  LogOut,
 } from 'lucide-react';
 import { useLifeflowStore } from '@/stores/lifeflowStore';
+import { useAuthStore } from '@/stores/authStore';
 import { clearAutoSave } from '@/lib/database';
 
 const navItems = [
@@ -27,6 +29,7 @@ export function Sidebar() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const entries = useLifeflowStore((s) => s.entries);
   const clearAll = useLifeflowStore((s) => s.clearAll);
+  const signOut = useAuthStore((s) => s.signOut);
 
   const hasData = Object.keys(entries).length > 0;
 
@@ -79,6 +82,15 @@ export function Sidebar() {
             <span className="text-[10px] font-medium">Clear</span>
           </button>
         )}
+
+        <button
+          onClick={signOut}
+          className="w-14 px-1 py-2 rounded-lg flex flex-col items-center justify-center gap-1 text-gray-500 hover:bg-white/[0.06] hover:text-white/70 transition-colors"
+          title="Sign Out"
+        >
+          <LogOut size={18} />
+          <span className="text-[10px] font-medium">Sign out</span>
+        </button>
       </aside>
 
       {/* Mobile bottom navigation */}

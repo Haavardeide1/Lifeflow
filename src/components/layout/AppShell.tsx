@@ -1,12 +1,38 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { usePersistence } from '@/hooks/usePersistence';
-import { useSeedData } from '@/hooks/useSeedData';
+import { useAuthStore } from '@/stores/authStore';
+import { AuthScreen } from '@/components/auth/AuthScreen';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const user = useAuthStore((s) => s.user);
+  const loading = useAuthStore((s) => s.loading);
+  const initialize = useAuthStore((s) => s.initialize);
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   usePersistence();
-  useSeedData();
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-gray-950 text-white items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center mx-auto mb-3 animate-pulse">
+            <span className="text-white font-bold text-xl">L</span>
+          </div>
+          <p className="text-[13px] text-white/40">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthScreen />;
+  }
 
   return (
     <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
