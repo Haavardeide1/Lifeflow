@@ -22,6 +22,24 @@ export function usePersistence() {
   const prevHabitsRef = useRef<typeof habits>({});
   const prevWishesRef = useRef<typeof wishes>({});
   const prevEntriesRef = useRef<typeof entries>({});
+  const prevUserIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const currentUserId = user?.id ?? null;
+    if (prevUserIdRef.current !== currentUserId) {
+      prevUserIdRef.current = currentUserId;
+      hasLoadedRef.current = false;
+      lastSaveRef.current = '';
+      prevHabitsRef.current = {};
+      prevWishesRef.current = {};
+      prevEntriesRef.current = {};
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+      loadData([], [], []);
+    }
+  }, [user?.id, loadData]);
 
   // Load data: from Supabase if logged in, fallback to IndexedDB
   useEffect(() => {

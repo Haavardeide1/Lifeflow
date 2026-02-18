@@ -46,6 +46,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     import('@/stores/profileStore').then(({ useProfileStore }) => {
       useProfileStore.getState().reset();
     });
+    // Reset lifeflow state to avoid leaking cached data between users
+    import('@/stores/lifeflowStore').then(({ useLifeflowStore }) => {
+      useLifeflowStore.getState().loadData([], [], []);
+    });
   },
 
   initialize: async () => {
