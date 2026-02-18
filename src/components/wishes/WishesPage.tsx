@@ -39,6 +39,7 @@ export function WishesPage() {
   const [metric, setMetric] = useState<WishMetric>('energy');
   const [targetValue, setTargetValue] = useState(7);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [titleTouched, setTitleTouched] = useState(false);
 
   const weekData = useMemo(() => {
     const end = today();
@@ -53,6 +54,17 @@ export function WishesPage() {
       setHabitId(activeHabits[0].id);
     }
   }, [habitId, activeHabits]);
+
+  useEffect(() => {
+    if (titleTouched) return;
+    if (kind === 'habit') {
+      const habitTitle = habits[habitId]?.name ?? '';
+      if (habitTitle) setTitle(habitTitle);
+    } else {
+      const metricLabel = METRIC_OPTIONS.find((m) => m.value === metric)?.label ?? 'Wellbeing goal';
+      setTitle(`Better ${metricLabel.toLowerCase()}`);
+    }
+  }, [titleTouched, kind, habitId, metric, habits]);
 
   const habitWishData = useMemo(() => {
     const weekEntries = weekData.weekEntries;
@@ -134,6 +146,7 @@ export function WishesPage() {
 
     setTitle('');
     setEditingId(null);
+    setTitleTouched(false);
   };
 
   const habitLabel = (habitIdValue?: string) => habits[habitIdValue || '']?.name || 'Unknown habit';
@@ -142,6 +155,7 @@ export function WishesPage() {
     setEditingId(wish.id);
     setKind(wish.kind);
     setTitle(wish.title);
+    setTitleTouched(true);
     if (wish.kind === 'habit') {
       setHabitId(wish.habitId ?? activeHabits[0]?.id ?? '');
       setTargetPerWeek(wish.targetPerWeek ?? 3);
@@ -154,7 +168,10 @@ export function WishesPage() {
   const cancelEdit = () => {
     setEditingId(null);
     setTitle('');
+    setTitleTouched(false);
   };
+
+  const isSubmitDisabled = kind === 'habit' && !habitId;
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -174,44 +191,66 @@ export function WishesPage() {
 
         <Card title={editingId ? 'Edit Wish' : 'Add Wish'}>
           <form onSubmit={handleSubmit} className="p-5 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] text-gray-400 dark:text-white/40 mb-1">Type</label>
-                <select
-                  value={kind}
-                  onChange={(e) => setKind(e.target.value as Wish['kind'])}
-                  className="w-full rounded-lg bg-white/70 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] px-3 py-2 text-[13px]"
-                >
-                  <option value="habit">Habit wish</option>
-                  <option value="metric">Wellbeing goal</option>
-                </select>
-              </div>
+            <div className="space-y-3">
               <div>
                 <label className="block text-[11px] text-gray-400 dark:text-white/40 mb-1">Title</label>
                 <input
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    setTitleTouched(true);
+                  }}
                   placeholder={kind === 'habit' ? 'Run more, read at night...' : 'Higher energy all week'}
                   className="w-full rounded-lg bg-white/70 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] px-3 py-2 text-[13px]"
                 />
+                <p className="text-[10px] text-gray-400 dark:text-white/30 mt-1">
+                  Leave empty to auto-use the habit or goal name.
+                </p>
               </div>
-            </div>
 
-            {kind === 'habit' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] text-gray-400 dark:text-white/40 mb-1">Habit</label>
+                  <label className="block text-[11px] text-gray-400 dark:text-white/40 mb-1">Type</label>
                   <select
-                    value={habitId}
-                    onChange={(e) => setHabitId(e.target.value)}
+                    value={kind}
+                    onChange={(e) => setKind(e.target.value as Wish['kind'])}
                     className="w-full rounded-lg bg-white/70 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] px-3 py-2 text-[13px]"
                   >
-                    {activeHabits.length === 0 && <option value="">No habits yet</option>}
-                    {activeHabits.map((h) => (
-                      <option key={h.id} value={h.id}>{h.name}</option>
-                    ))}
+                    <option value="habit">Habit wish</option>
+                    <option value="metric">Wellbeing goal</option>
                   </select>
                 </div>
+                {kind === 'habit' ? (
+                  <div>
+                    <label className="block text-[11px] text-gray-400 dark:text-white/40 mb-1">Habit</label>
+                    <select
+                      value={habitId}
+                      onChange={(e) => setHabitId(e.target.value)}
+                      className="w-full rounded-lg bg-white/70 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] px-3 py-2 text-[13px]"
+                    >
+                      {activeHabits.length === 0 && <option value="">No habits yet</option>}
+                      {activeHabits.map((h) => (
+                        <option key={h.id} value={h.id}>{h.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-[11px] text-gray-400 dark:text-white/40 mb-1">Metric</label>
+                    <select
+                      value={metric}
+                      onChange={(e) => setMetric(e.target.value as WishMetric)}
+                      className="w-full rounded-lg bg-white/70 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] px-3 py-2 text-[13px]"
+                    >
+                      {METRIC_OPTIONS.map((m) => (
+                        <option key={m.value} value={m.value}>{m.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {kind === 'habit' ? (
                 <div>
                   <label className="block text-[11px] text-gray-400 dark:text-white/40 mb-1">Target / week</label>
                   <input
@@ -223,21 +262,7 @@ export function WishesPage() {
                     className="w-full rounded-lg bg-white/70 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] px-3 py-2 text-[13px]"
                   />
                 </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] text-gray-400 dark:text-white/40 mb-1">Metric</label>
-                  <select
-                    value={metric}
-                    onChange={(e) => setMetric(e.target.value as WishMetric)}
-                    className="w-full rounded-lg bg-white/70 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] px-3 py-2 text-[13px]"
-                  >
-                    {METRIC_OPTIONS.map((m) => (
-                      <option key={m.value} value={m.value}>{m.label}</option>
-                    ))}
-                  </select>
-                </div>
+              ) : (
                 <div>
                   <label className="block text-[11px] text-gray-400 dark:text-white/40 mb-1">Target value (1-10)</label>
                   <input
@@ -250,25 +275,28 @@ export function WishesPage() {
                     className="w-full rounded-lg bg-white/70 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.06] px-3 py-2 text-[13px]"
                   />
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
-            <button
-              type="submit"
-              className="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-[13px] font-semibold text-white transition-colors inline-flex items-center gap-2"
-            >
-              <Plus size={14} />
-              {editingId ? 'Save changes' : 'Add wish'}
-            </button>
-            {editingId && (
+            <div className="flex flex-wrap gap-2">
               <button
-                type="button"
-                onClick={cancelEdit}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-200 dark:border-white/[0.08] text-[13px] font-semibold text-gray-500 dark:text-white/60 hover:text-gray-800 dark:hover:text-white transition-colors"
+                type="submit"
+                disabled={isSubmitDisabled}
+                className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-[13px] font-semibold text-white transition-colors inline-flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Cancel
+                <Plus size={14} />
+                {editingId ? 'Save changes' : 'Add wish'}
               </button>
-            )}
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  className="px-4 py-2 rounded-lg border border-gray-200 dark:border-white/[0.08] text-[13px] font-semibold text-gray-500 dark:text-white/60 hover:text-gray-800 dark:hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </form>
         </Card>
 
