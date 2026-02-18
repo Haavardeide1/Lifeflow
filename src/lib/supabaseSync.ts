@@ -485,16 +485,19 @@ export async function fetchStatusUpdates(userIds: string[]): Promise<StatusUpdat
 
   if (error) throw error;
 
-  return (data || []).map((row) => ({
+  return (data || []).map((row) => {
+    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+    return {
     id: row.id,
     userId: row.user_id,
     body: row.body,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    username: row.profiles?.username ?? null,
-    displayName: row.profiles?.display_name ?? null,
-    avatarColor: row.profiles?.avatar_color ?? null,
-  }));
+    username: profile?.username ?? null,
+    displayName: profile?.display_name ?? null,
+    avatarColor: profile?.avatar_color ?? null,
+  };
+  });
 }
 
 export async function createStatusUpdate(userId: string, body: string): Promise<void> {
@@ -514,16 +517,19 @@ export async function fetchStatusComments(statusIds: string[]): Promise<StatusCo
 
   if (error) throw error;
 
-  return (data || []).map((row) => ({
+  return (data || []).map((row) => {
+    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+    return {
     id: row.id,
     statusId: row.status_id,
     userId: row.user_id,
     body: row.body,
     createdAt: row.created_at,
-    username: row.profiles?.username ?? null,
-    displayName: row.profiles?.display_name ?? null,
-    avatarColor: row.profiles?.avatar_color ?? null,
-  }));
+    username: profile?.username ?? null,
+    displayName: profile?.display_name ?? null,
+    avatarColor: profile?.avatar_color ?? null,
+  };
+  });
 }
 
 export async function createStatusComment(statusId: string, userId: string, body: string): Promise<void> {
@@ -543,15 +549,18 @@ export async function fetchStatusKudos(statusIds: string[]): Promise<StatusKudo[
 
   if (error) throw error;
 
-  return (data || []).map((row) => ({
+  return (data || []).map((row) => {
+    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+    return {
     id: row.id,
     statusId: row.status_id,
     userId: row.user_id,
     createdAt: row.created_at,
-    username: row.profiles?.username ?? null,
-    displayName: row.profiles?.display_name ?? null,
-    avatarColor: row.profiles?.avatar_color ?? null,
-  }));
+    username: profile?.username ?? null,
+    displayName: profile?.display_name ?? null,
+    avatarColor: profile?.avatar_color ?? null,
+  };
+  });
 }
 
 export async function toggleStatusKudo(statusId: string, userId: string): Promise<void> {

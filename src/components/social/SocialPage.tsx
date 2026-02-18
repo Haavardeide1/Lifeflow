@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useProfileStore } from '@/stores/profileStore';
 import { Card } from '@/components/shared/Card';
@@ -74,7 +74,7 @@ export function SocialPage() {
     return grouped;
   }, [kudos]);
 
-  const loadFeed = async () => {
+  const loadFeed = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
@@ -93,11 +93,11 @@ export function SocialPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadFeed();
-  }, [user]);
+  }, [loadFeed]);
 
   const handlePost = async () => {
     if (!user) return;
