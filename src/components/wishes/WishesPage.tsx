@@ -49,6 +49,38 @@ export function WishesPage() {
     return { start, end, dates, weekEntries };
   }, [entries]);
 
+  const weekStats = useMemo(() => {
+    const habitCounts: Record<string, number> = {};
+    const metricSums: Record<WishMetric, number> = {
+      energy: 0,
+      mood: 0,
+      sleep: 0,
+      healthScore: 0,
+    };
+    const entryCount = weekData.weekEntries.length;
+
+    for (const entry of weekData.weekEntries) {
+      metricSums.energy += entry.energy;
+      metricSums.mood += entry.mood;
+      metricSums.sleep += entry.sleep;
+      metricSums.healthScore += entry.healthScore;
+
+      for (const hc of entry.habitCompletions) {
+        if (!hc.completed) continue;
+        habitCounts[hc.habitId] = (habitCounts[hc.habitId] ?? 0) + 1;
+      }
+    }
+
+    const metricAverages: Record<WishMetric, number> = {
+      energy: entryCount > 0 ? metricSums.energy / entryCount : 0,
+      mood: entryCount > 0 ? metricSums.mood / entryCount : 0,
+      sleep: entryCount > 0 ? metricSums.sleep / entryCount : 0,
+      healthScore: entryCount > 0 ? metricSums.healthScore / entryCount : 0,
+    };
+
+    return { habitCounts, metricAverages };
+  }, [weekData.weekEntries]);
+
   useEffect(() => {
     if (!habitId && activeHabits.length > 0) {
       setHabitId(activeHabits[0].id);
@@ -67,15 +99,11 @@ export function WishesPage() {
   }, [titleTouched, kind, habitId, metric, habits]);
 
   const habitWishData = useMemo(() => {
-    const weekEntries = weekData.weekEntries;
     return Object.values(wishes)
       .filter((w) => w.active && w.kind === 'habit' && w.habitId)
       .map((w) => {
         const habit = habits[w.habitId!];
-        const actual = weekEntries.reduce((count, entry) => {
-          const hc = entry.habitCompletions.find((c) => c.habitId === w.habitId);
-          return count + (hc?.completed ? 1 : 0);
-        }, 0);
+        const actual = weekStats.habitCounts[w.habitId!] ?? 0;
         const target = w.targetPerWeek ?? 0;
         const ratio = target > 0 ? Math.min(1, actual / target) : 0;
         return {
@@ -87,7 +115,7 @@ export function WishesPage() {
         };
       })
       .sort((a, b) => b.actual - a.actual);
-  }, [wishes, habits, weekData.weekEntries]);
+  }, [wishes, habits, weekStats.habitCounts]);
 
   const habitTotals = useMemo(() => {
     const totalActual = habitWishData.reduce((sum, h) => sum + h.actual, 0);
@@ -97,13 +125,11 @@ export function WishesPage() {
   }, [habitWishData]);
 
   const metricWishData = useMemo(() => {
-    const weekEntries = weekData.weekEntries;
     return Object.values(wishes)
       .filter((w) => w.active && w.kind === 'metric' && w.metric)
       .map((w) => {
         const metricKey = w.metric!;
-        const values = weekEntries.map((e) => (metricKey === 'healthScore' ? e.healthScore : e[metricKey]));
-        const actual = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+        const actual = weekStats.metricAverages[metricKey];
         const target = w.targetValue ?? 0;
         return {
           wish: w,
@@ -113,7 +139,7 @@ export function WishesPage() {
         };
       })
       .sort((a, b) => b.actual - a.actual);
-  }, [wishes, weekData.weekEntries]);
+  }, [wishes, weekStats.metricAverages]);
 
   const hasWishes = Object.values(wishes).some((w) => w.active);
 

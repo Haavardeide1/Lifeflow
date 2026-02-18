@@ -10,7 +10,7 @@ import type {
   LifeflowSnapshot,
   HistoryEntry,
 } from '@/types';
-import { calculateHealthScore } from '@/lib/scoring';
+import { buildHabitImpactMap, calculateHealthScoreFromMap } from '@/lib/scoring';
 
 const MAX_HISTORY = 50;
 
@@ -198,7 +198,8 @@ export const useLifeflowStore = create<LifeflowState>((set, get) => ({
   saveEntry: ({ date, mood, energy, sleep, habitCompletions, notes }) => {
     const now = Date.now();
     const existing = get().entries[date];
-    const healthScore = calculateHealthScore(mood, energy, sleep, habitCompletions, get().habits);
+    const impactMap = buildHabitImpactMap(get().habits);
+    const healthScore = calculateHealthScoreFromMap(mood, energy, sleep, habitCompletions, impactMap);
 
     const entry: DailyEntry = {
       date, mood, energy, sleep, habitCompletions, notes, healthScore,
@@ -252,12 +253,13 @@ export const useLifeflowStore = create<LifeflowState>((set, get) => ({
 
   recalculateScores: () => {
     const { habits, entries } = get();
+    const impactMap = buildHabitImpactMap(habits);
     const updatedEntries = { ...entries };
     for (const date of Object.keys(updatedEntries)) {
       const e = updatedEntries[date];
       updatedEntries[date] = {
         ...e,
-        healthScore: calculateHealthScore(e.mood, e.energy, e.sleep, e.habitCompletions, habits),
+        healthScore: calculateHealthScoreFromMap(e.mood, e.energy, e.sleep, e.habitCompletions, impactMap),
       };
     }
     set({ entries: updatedEntries });
