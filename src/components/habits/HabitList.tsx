@@ -16,6 +16,7 @@ export function HabitList() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [formDefaults, setFormDefaults] = useState<{ name?: string; type?: 'good' | 'bad' } | undefined>();
   const [showArchived, setShowArchived] = useState(false);
 
   const activeHabits = Object.values(habits)
@@ -124,23 +125,27 @@ export function HabitList() {
                 <p className="text-[12px] text-gray-400 dark:text-white/30 uppercase tracking-wider font-medium">Ideas</p>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { label: 'Exercise', type: 'good' },
-                    { label: 'Read a book', type: 'good' },
-                    { label: 'Call a friend', type: 'good' },
-                    { label: 'Meditate', type: 'good' },
-                    { label: 'Junk food', type: 'bad' },
-                    { label: 'Late screen time', type: 'bad' },
+                    { label: 'Exercise', type: 'good' as const },
+                    { label: 'Read a book', type: 'good' as const },
+                    { label: 'Call a friend', type: 'good' as const },
+                    { label: 'Meditate', type: 'good' as const },
+                    { label: 'Junk food', type: 'bad' as const },
+                    { label: 'Late screen time', type: 'bad' as const },
                   ].map(idea => (
-                    <span
+                    <button
                       key={idea.label}
-                      className={`text-[12px] px-2.5 py-1.5 rounded-lg ${
+                      onClick={() => {
+                        setFormDefaults({ name: idea.label, type: idea.type });
+                        setShowForm(true);
+                      }}
+                      className={`text-[12px] px-2.5 py-1.5 rounded-lg text-left cursor-pointer hover:opacity-80 transition-opacity ${
                         idea.type === 'good'
                           ? 'bg-emerald-500/10 text-emerald-400/70'
                           : 'bg-red-500/10 text-red-400/70'
                       }`}
                     >
                       {idea.label}
-                    </span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -209,7 +214,11 @@ export function HabitList() {
 
       {/* Modals */}
       {showForm && (
-        <HabitForm onSave={handleAddHabit} onCancel={() => setShowForm(false)} />
+        <HabitForm
+          defaultValues={formDefaults}
+          onSave={(data) => { handleAddHabit(data); setFormDefaults(undefined); }}
+          onCancel={() => { setShowForm(false); setFormDefaults(undefined); }}
+        />
       )}
       {editingHabit && (
         <HabitForm

@@ -32,6 +32,19 @@ export type DateKey = string;
 export interface HabitCompletion {
   habitId: string;
   completed: boolean;
+  emotionalTags?: string[];
+  energy?: number;
+  mood?: number;
+  note?: string;
+}
+
+/** Local check-in form state for a single habit */
+export interface HabitFeedback {
+  completed: boolean;
+  emotionalTags?: string[];
+  energy?: number;
+  mood?: number;
+  note?: string;
 }
 
 export interface DailyEntry {

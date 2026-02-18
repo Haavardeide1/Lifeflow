@@ -36,7 +36,7 @@ export async function loadUserData(userId: string): Promise<{
     .from('entries')
     .select(`
       *,
-      habit_completions (habit_id, completed)
+      habit_completions (habit_id, completed, emotional_tags, energy, mood, note)
     `)
     .eq('user_id', userId)
     .order('date');
@@ -50,9 +50,13 @@ export async function loadUserData(userId: string): Promise<{
     sleep: e.sleep,
     healthScore: Number(e.health_score),
     notes: e.notes,
-    habitCompletions: (e.habit_completions || []).map((hc: { habit_id: string; completed: boolean }) => ({
+    habitCompletions: (e.habit_completions || []).map((hc: { habit_id: string; completed: boolean; emotional_tags?: string[]; energy?: number; mood?: number; note?: string }) => ({
       habitId: hc.habit_id,
       completed: hc.completed,
+      emotionalTags: hc.emotional_tags || undefined,
+      energy: hc.energy ?? undefined,
+      mood: hc.mood ?? undefined,
+      note: hc.note || undefined,
     })),
     createdAt: new Date(e.created_at).getTime(),
     updatedAt: new Date(e.updated_at).getTime(),
@@ -134,6 +138,10 @@ export async function upsertEntry(
       entry_id: entryId,
       habit_id: hc.habitId,
       completed: hc.completed,
+      emotional_tags: hc.emotionalTags || null,
+      energy: hc.energy ?? null,
+      mood: hc.mood ?? null,
+      note: hc.note || null,
     }));
 
     const { error: compError } = await supabase

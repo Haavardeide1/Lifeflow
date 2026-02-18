@@ -13,16 +13,17 @@ const PRESET_COLORS = [
 
 interface HabitFormProps {
   habit?: Habit;
+  defaultValues?: { name?: string; type?: HabitType };
   onSave: (data: { name: string; type: HabitType; weight: number; icon: string; color: string }) => void;
   onCancel: () => void;
 }
 
-export function HabitForm({ habit, onSave, onCancel }: HabitFormProps) {
-  const [name, setName] = useState(habit?.name ?? '');
-  const [type, setType] = useState<HabitType>(habit?.type ?? 'good');
+export function HabitForm({ habit, defaultValues, onSave, onCancel }: HabitFormProps) {
+  const [name, setName] = useState(habit?.name ?? defaultValues?.name ?? '');
+  const [type, setType] = useState<HabitType>(habit?.type ?? defaultValues?.type ?? 'good');
   const [weight, setWeight] = useState(habit?.weight ?? 5);
   const [icon, setIcon] = useState(habit?.icon ?? 'heart');
-  const [color, setColor] = useState(habit?.color ?? '#22c55e');
+  const [color, setColor] = useState(habit?.color ?? (defaultValues?.type === 'bad' ? '#ef4444' : '#22c55e'));
 
   const handleSubmit = () => {
     if (!name.trim()) return;

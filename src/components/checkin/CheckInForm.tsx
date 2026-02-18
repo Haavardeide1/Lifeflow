@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLifeflowStore } from '@/stores/lifeflowStore';
 import { useUIStore } from '@/stores/uiStore';
-import type { HabitCompletion } from '@/types';
+import type { HabitCompletion, HabitFeedback } from '@/types';
 import { HabitToggle } from './HabitToggle';
+import { HabitFeedbackModal } from './HabitFeedbackModal';
 import { SliderInput } from '@/components/shared/SliderInput';
 import { Card } from '@/components/shared/Card';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -22,9 +23,10 @@ export function CheckInForm() {
   const [mood, setMood] = useState(5);
   const [energy, setEnergy] = useState(5);
   const [sleep, setSleep] = useState(5);
-  const [completions, setCompletions] = useState<Record<string, boolean>>({});
+  const [completions, setCompletions] = useState<Record<string, HabitFeedback>>({});
   const [notes, setNotes] = useState('');
   const [saved, setSaved] = useState(false);
+  const [feedbackModalHabitId, setFeedbackModalHabitId] = useState<string | null>(null);
 
   const activeHabits = Object.values(habits)
     .filter(h => h.active)
@@ -42,9 +44,15 @@ export function CheckInForm() {
       setEnergy(existingEntry.energy);
       setSleep(existingEntry.sleep);
       setNotes(existingEntry.notes);
-      const comps: Record<string, boolean> = {};
+      const comps: Record<string, HabitFeedback> = {};
       existingEntry.habitCompletions.forEach(hc => {
-        comps[hc.habitId] = hc.completed;
+        comps[hc.habitId] = {
+          completed: hc.completed,
+          emotionalTags: hc.emotionalTags,
+          energy: hc.energy,
+          mood: hc.mood,
+          note: hc.note,
+        };
       });
       setCompletions(comps);
     } else {
@@ -63,15 +71,59 @@ export function CheckInForm() {
   }, [setCheckinDate]);
 
   const toggleHabit = useCallback((habitId: string) => {
-    setCompletions(prev => ({ ...prev, [habitId]: !prev[habitId] }));
+    setCompletions(prev => {
+      const current = prev[habitId];
+      if (current?.completed) {
+        // Toggle OFF → remove immediately
+        const next = { ...prev };
+        delete next[habitId];
+        return next;
+      } else {
+        // Toggle ON → open feedback modal (don't mark completed yet)
+        setFeedbackModalHabitId(habitId);
+        return prev;
+      }
+    });
     setSaved(false);
   }, []);
 
-  const handleSave = () => {
-    const habitCompletions: HabitCompletion[] = activeHabits.map(h => ({
-      habitId: h.id,
-      completed: !!completions[h.id],
+  const handleFeedbackSave = useCallback((feedback: HabitFeedback) => {
+    if (!feedbackModalHabitId) return;
+    setCompletions(prev => ({
+      ...prev,
+      [feedbackModalHabitId]: feedback,
     }));
+    setFeedbackModalHabitId(null);
+    setSaved(false);
+  }, [feedbackModalHabitId]);
+
+  const handleFeedbackSkip = useCallback(() => {
+    if (!feedbackModalHabitId) return;
+    setCompletions(prev => ({
+      ...prev,
+      [feedbackModalHabitId]: { completed: true },
+    }));
+    setFeedbackModalHabitId(null);
+    setSaved(false);
+  }, [feedbackModalHabitId]);
+
+  const handleFeedbackClose = useCallback(() => {
+    // Cancel — habit stays unchecked
+    setFeedbackModalHabitId(null);
+  }, []);
+
+  const handleSave = () => {
+    const habitCompletions: HabitCompletion[] = activeHabits.map(h => {
+      const fb = completions[h.id];
+      return {
+        habitId: h.id,
+        completed: !!fb?.completed,
+        emotionalTags: fb?.emotionalTags,
+        energy: fb?.energy,
+        mood: fb?.mood,
+        note: fb?.note,
+      };
+    });
 
     saveEntry({ date: checkinDate, mood, energy, sleep, habitCompletions, notes });
     setSaved(true);
@@ -83,6 +135,8 @@ export function CheckInForm() {
     const next = addDays(checkinDate, 1);
     if (!isFuture(next)) setCheckinDate(next);
   };
+
+  const feedbackModalHabit = feedbackModalHabitId ? habits[feedbackModalHabitId] : null;
 
   if (activeHabits.length === 0) {
     return (
@@ -144,7 +198,7 @@ export function CheckInForm() {
                 <HabitToggle
                   key={h.id}
                   habit={h}
-                  completed={!!completions[h.id]}
+                  completed={!!completions[h.id]?.completed}
                   onToggle={() => toggleHabit(h.id)}
                 />
               ))}
@@ -160,7 +214,7 @@ export function CheckInForm() {
                 <HabitToggle
                   key={h.id}
                   habit={h}
-                  completed={!!completions[h.id]}
+                  completed={!!completions[h.id]?.completed}
                   onToggle={() => toggleHabit(h.id)}
                 />
               ))}
@@ -234,6 +288,16 @@ export function CheckInForm() {
 
         <div className="h-8" />
       </div>
+
+      {/* Feedback Modal */}
+      {feedbackModalHabit && (
+        <HabitFeedbackModal
+          habitName={feedbackModalHabit.name}
+          onSave={handleFeedbackSave}
+          onSkip={handleFeedbackSkip}
+          onClose={handleFeedbackClose}
+        />
+      )}
     </div>
   );
 }
