@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  Mountain,
   LayoutDashboard,
   ClipboardCheck,
   TrendingUp,
@@ -44,9 +45,9 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-16 bg-gray-100 dark:bg-gray-900 flex-col items-center py-4 gap-2">
+      <aside className="hidden md:flex w-20 bg-gray-100 dark:bg-gray-900 flex-col items-center py-4 gap-2">
         <div className="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center mb-4">
-          <span className="text-white font-bold text-lg">L</span>
+          <Mountain size={20} className="text-white" />
         </div>
 
         <nav className="flex flex-col gap-1">
@@ -58,7 +59,7 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={`
-                  w-12 h-12 rounded-lg flex items-center justify-center transition-colors
+                  w-16 px-1 py-2 rounded-lg flex flex-col items-center justify-center gap-0.5 transition-colors
                   ${isActive
                     ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
                     : 'text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
@@ -66,7 +67,8 @@ export function Sidebar() {
                 `}
                 title={item.label}
               >
-                <Icon size={20} />
+                <Icon size={18} />
+                <span className="text-[10px] font-medium">{item.label}</span>
               </Link>
             );
           })}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Mountain } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 
 export function AuthScreen() {
@@ -40,7 +41,7 @@ export function AuthScreen() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-xl bg-emerald-600 flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">L</span>
+            <Mountain size={28} className="text-white" />
           </div>
           <h1 className="text-[22px] font-bold">Lifeflow</h1>
           <p className="text-[13px] text-gray-400 dark:text-white/40 mt-1">Track your habits. Understand yourself.</p>
