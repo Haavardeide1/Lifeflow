@@ -3,6 +3,7 @@ import type { Habit, DailyEntry, DateKey, Wish } from '@/types';
 
 export interface StoredState {
   id: string;
+  userId?: string;
   habits: Record<string, Habit>;
   wishes: Record<string, Wish>;
   entries: Record<DateKey, DailyEntry>;
@@ -24,13 +25,20 @@ export const db = new LifeflowDatabase();
 
 const AUTO_SAVE_ID = 'auto-save';
 
+function getAutoSaveId(userId?: string): string {
+  if (!userId) return AUTO_SAVE_ID;
+  return `${AUTO_SAVE_ID}:${userId}`;
+}
+
 export async function autoSave(
   habits: Record<string, Habit>,
   wishes: Record<string, Wish>,
-  entries: Record<DateKey, DailyEntry>
+  entries: Record<DateKey, DailyEntry>,
+  userId?: string
 ): Promise<void> {
   await db.state.put({
-    id: AUTO_SAVE_ID,
+    id: getAutoSaveId(userId),
+    userId,
     habits,
     wishes,
     entries,
@@ -38,10 +46,17 @@ export async function autoSave(
   });
 }
 
-export async function loadAutoSave(): Promise<StoredState | undefined> {
+export async function loadAutoSave(userId?: string): Promise<StoredState | undefined> {
+  if (userId) {
+    return await db.state.get(getAutoSaveId(userId));
+  }
   return await db.state.get(AUTO_SAVE_ID);
 }
 
-export async function clearAutoSave(): Promise<void> {
+export async function clearAutoSave(userId?: string): Promise<void> {
+  if (userId) {
+    await db.state.delete(getAutoSaveId(userId));
+    return;
+  }
   await db.state.delete(AUTO_SAVE_ID);
 }

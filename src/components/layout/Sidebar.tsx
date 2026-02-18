@@ -35,12 +35,13 @@ export function Sidebar() {
   const entries = useLifeflowStore((s) => s.entries);
   const clearAll = useLifeflowStore((s) => s.clearAll);
   const signOut = useAuthStore((s) => s.signOut);
+  const user = useAuthStore((s) => s.user);
 
   const hasData = Object.keys(entries).length > 0;
 
   const handleClearAll = async () => {
     clearAll();
-    await clearAutoSave();
+    await clearAutoSave(user?.id);
     setShowConfirmModal(false);
   };
 

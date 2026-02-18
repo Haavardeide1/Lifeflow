@@ -29,7 +29,7 @@ export function usePersistence() {
 
     const load = async () => {
       try {
-        const saved = await loadAutoSave();
+        const saved = await loadAutoSave(user?.id);
         const savedHabits = saved ? Object.values(saved.habits) : [];
         const savedEntries = saved ? Object.values(saved.entries) : [];
         const savedWishes = saved?.wishes ? Object.values(saved.wishes) : [];
@@ -47,7 +47,7 @@ export function usePersistence() {
             data.entries.forEach(e => entriesRecord[e.date] = e);
             const wishesRecord: Record<string, typeof wishesToUse[0]> = {};
             wishesToUse.forEach(w => wishesRecord[w.id] = w);
-            await autoSave(habitsRecord, wishesRecord, entriesRecord);
+            await autoSave(habitsRecord, wishesRecord, entriesRecord, user.id);
             hasLoadedRef.current = true;
             return;
           }
@@ -72,7 +72,7 @@ export function usePersistence() {
       } catch (error) {
         console.error('Failed to load data:', error);
         // Fallback to IndexedDB on Supabase failure
-        const saved = await loadAutoSave();
+        const saved = await loadAutoSave(user?.id);
         if (saved) {
           loadData(
             Object.values(saved.habits),
@@ -112,7 +112,7 @@ export function usePersistence() {
     saveTimeoutRef.current = setTimeout(async () => {
       try {
         // Always save to IndexedDB (fast, offline)
-        await autoSave(habits, wishes, entries);
+        await autoSave(habits, wishes, entries, user?.id);
         lastSaveRef.current = stateHash;
 
         // Sync changed items to Supabase if logged in
@@ -191,12 +191,12 @@ export function usePersistence() {
 
   const save = useCallback(async () => {
     try {
-      await autoSave(habits, wishes, entries);
-    } catch (error) {
-      console.error('Failed to save:', error);
-      throw error;
-    }
-  }, [habits, wishes, entries]);
+        await autoSave(habits, wishes, entries, user?.id);
+      } catch (error) {
+        console.error('Failed to save:', error);
+        throw error;
+      }
+  }, [habits, wishes, entries, user?.id]);
 
   return { save };
 }
