@@ -479,24 +479,41 @@ export async function fetchStatusUpdates(userIds: string[]): Promise<StatusUpdat
   if (userIds.length === 0) return [];
   const { data, error } = await supabase
     .from('status_updates')
-    .select('id, user_id, body, created_at, updated_at, profiles:profiles!status_updates_user_id_fkey(username, display_name, avatar_color)')
+    .select('id, user_id, body, created_at, updated_at')
     .in('user_id', userIds)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
 
-  return (data || []).map((row) => {
-    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+  const rows = data || [];
+  const uniqueIds = Array.from(new Set(rows.map((row) => row.user_id)));
+  const profileMap = new Map<string, { username: string | null; display_name: string | null; avatar_color: string | null }>();
+
+  if (uniqueIds.length > 0) {
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, username, display_name, avatar_color')
+      .in('id', uniqueIds);
+    if (profileError) throw profileError;
+    profiles?.forEach((p) => profileMap.set(p.id, {
+      username: p.username ?? null,
+      display_name: p.display_name ?? null,
+      avatar_color: p.avatar_color ?? null,
+    }));
+  }
+
+  return rows.map((row) => {
+    const profile = profileMap.get(row.user_id);
     return {
-    id: row.id,
-    userId: row.user_id,
-    body: row.body,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    username: profile?.username ?? null,
-    displayName: profile?.display_name ?? null,
-    avatarColor: profile?.avatar_color ?? null,
-  };
+      id: row.id,
+      userId: row.user_id,
+      body: row.body,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      username: profile?.username ?? null,
+      displayName: profile?.display_name ?? null,
+      avatarColor: profile?.avatar_color ?? null,
+    };
   });
 }
 
@@ -511,24 +528,41 @@ export async function fetchStatusComments(statusIds: string[]): Promise<StatusCo
   if (statusIds.length === 0) return [];
   const { data, error } = await supabase
     .from('status_comments')
-    .select('id, status_id, user_id, body, created_at, profiles:profiles!status_comments_user_id_fkey(username, display_name, avatar_color)')
+    .select('id, status_id, user_id, body, created_at')
     .in('status_id', statusIds)
     .order('created_at', { ascending: true });
 
   if (error) throw error;
 
-  return (data || []).map((row) => {
-    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+  const rows = data || [];
+  const uniqueIds = Array.from(new Set(rows.map((row) => row.user_id)));
+  const profileMap = new Map<string, { username: string | null; display_name: string | null; avatar_color: string | null }>();
+
+  if (uniqueIds.length > 0) {
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, username, display_name, avatar_color')
+      .in('id', uniqueIds);
+    if (profileError) throw profileError;
+    profiles?.forEach((p) => profileMap.set(p.id, {
+      username: p.username ?? null,
+      display_name: p.display_name ?? null,
+      avatar_color: p.avatar_color ?? null,
+    }));
+  }
+
+  return rows.map((row) => {
+    const profile = profileMap.get(row.user_id);
     return {
-    id: row.id,
-    statusId: row.status_id,
-    userId: row.user_id,
-    body: row.body,
-    createdAt: row.created_at,
-    username: profile?.username ?? null,
-    displayName: profile?.display_name ?? null,
-    avatarColor: profile?.avatar_color ?? null,
-  };
+      id: row.id,
+      statusId: row.status_id,
+      userId: row.user_id,
+      body: row.body,
+      createdAt: row.created_at,
+      username: profile?.username ?? null,
+      displayName: profile?.display_name ?? null,
+      avatarColor: profile?.avatar_color ?? null,
+    };
   });
 }
 
@@ -543,23 +577,40 @@ export async function fetchStatusKudos(statusIds: string[]): Promise<StatusKudo[
   if (statusIds.length === 0) return [];
   const { data, error } = await supabase
     .from('status_kudos')
-    .select('id, status_id, user_id, created_at, profiles:profiles!status_kudos_user_id_fkey(username, display_name, avatar_color)')
+    .select('id, status_id, user_id, created_at')
     .in('status_id', statusIds)
     .order('created_at', { ascending: true });
 
   if (error) throw error;
 
-  return (data || []).map((row) => {
-    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+  const rows = data || [];
+  const uniqueIds = Array.from(new Set(rows.map((row) => row.user_id)));
+  const profileMap = new Map<string, { username: string | null; display_name: string | null; avatar_color: string | null }>();
+
+  if (uniqueIds.length > 0) {
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, username, display_name, avatar_color')
+      .in('id', uniqueIds);
+    if (profileError) throw profileError;
+    profiles?.forEach((p) => profileMap.set(p.id, {
+      username: p.username ?? null,
+      display_name: p.display_name ?? null,
+      avatar_color: p.avatar_color ?? null,
+    }));
+  }
+
+  return rows.map((row) => {
+    const profile = profileMap.get(row.user_id);
     return {
-    id: row.id,
-    statusId: row.status_id,
-    userId: row.user_id,
-    createdAt: row.created_at,
-    username: profile?.username ?? null,
-    displayName: profile?.display_name ?? null,
-    avatarColor: profile?.avatar_color ?? null,
-  };
+      id: row.id,
+      statusId: row.status_id,
+      userId: row.user_id,
+      createdAt: row.created_at,
+      username: profile?.username ?? null,
+      displayName: profile?.display_name ?? null,
+      avatarColor: profile?.avatar_color ?? null,
+    };
   });
 }
 
