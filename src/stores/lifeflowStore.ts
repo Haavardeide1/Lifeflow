@@ -209,7 +209,7 @@ export const useLifeflowStore = create<LifeflowState>((set, get) => ({
   redo: () => {
     const state = get();
     if (!state.canRedo()) return;
-    const nextEntry = state.history[state.historyIndex + 2];
+    const nextEntry = state.history[state.historyIndex + 1];
     if (nextEntry) {
       set({
         habits: nextEntry.snapshot.habits,

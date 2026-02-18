@@ -39,6 +39,10 @@ create table public.habit_completions (
   entry_id uuid references public.entries(id) on delete cascade not null,
   habit_id uuid references public.habits(id) on delete cascade not null,
   completed boolean not null default false,
+  emotional_tags text[] null,
+  energy integer null check (energy between 1 and 10),
+  mood integer null check (mood between 1 and 10),
+  note text null,
   unique(entry_id, habit_id)
 );
 
@@ -89,3 +93,12 @@ create policy "Users can delete own completions" on public.habit_completions
 create index idx_habits_user_id on public.habits(user_id);
 create index idx_entries_user_id_date on public.entries(user_id, date);
 create index idx_habit_completions_entry_id on public.habit_completions(entry_id);
+
+-- =============================================
+-- Optional: if you already created tables before adding new columns
+-- =============================================
+alter table public.habit_completions
+  add column if not exists emotional_tags text[],
+  add column if not exists energy integer,
+  add column if not exists mood integer,
+  add column if not exists note text;

@@ -38,7 +38,20 @@ export function usePersistence() {
             const entriesRecord: Record<string, typeof data.entries[0]> = {};
             data.entries.forEach(e => entriesRecord[e.date] = e);
             await autoSave(habitsRecord, entriesRecord);
+            hasLoadedRef.current = true;
+            return;
           }
+
+          // If Supabase is empty, fallback to local cache to avoid "lost" data
+          const saved = await loadAutoSave();
+          if (saved) {
+            const habitArray = Object.values(saved.habits);
+            const entryArray = Object.values(saved.entries);
+            if (habitArray.length > 0 || entryArray.length > 0) {
+              loadData(habitArray, entryArray);
+            }
+          }
+
           hasLoadedRef.current = true;
         } else {
           // Fallback to IndexedDB for offline/not-logged-in

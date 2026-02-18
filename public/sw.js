@@ -9,6 +9,9 @@ self.addEventListener('install', (event) => {
         '/checkin',
         '/insights',
         '/habits',
+        '/profile',
+        '/manifest.json',
+        '/icon.svg',
       ]);
     })
   );
@@ -31,6 +34,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
+  // Skip caching Supabase requests
+  if (event.request.url.includes('supabase.co')) return;
 
   event.respondWith(
     fetch(event.request)
