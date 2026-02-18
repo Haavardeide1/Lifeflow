@@ -141,7 +141,7 @@ export function usePersistence() {
               }
             }
           }
-          for (const [id, prevWish] of Object.entries(prevWishesRef.current)) {
+          for (const id of Object.keys(prevWishesRef.current)) {
             if (!wishIds.has(id)) {
               try {
                 await deleteWishCloud(id);
@@ -186,7 +186,7 @@ export function usePersistence() {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [habits, entries, user]);
+  }, [habits, wishes, entries, user]);
 
   const save = useCallback(async () => {
     try {
