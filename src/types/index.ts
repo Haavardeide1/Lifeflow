@@ -23,6 +23,28 @@ export interface Habit {
 }
 
 // ============================================================
+// WISHES / GOALS
+// ============================================================
+
+export type WishKind = 'habit' | 'metric';
+export type WishMetric = 'mood' | 'energy' | 'sleep' | 'healthScore';
+
+export interface Wish {
+  id: string;
+  title: string;
+  kind: WishKind;
+  habitId?: string;
+  metric?: WishMetric;
+  /** Weekly target for habit-based wishes */
+  targetPerWeek?: number;
+  /** Target value for metric-based wishes (1-10) */
+  targetValue?: number;
+  active: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+// ============================================================
 // DAILY ENTRIES
 // ============================================================
 
@@ -104,6 +126,7 @@ export interface StreakInfo {
 
 export interface LifeflowSnapshot {
   habits: Record<string, Habit>;
+  wishes: Record<string, Wish>;
   entries: Record<DateKey, DailyEntry>;
 }
 

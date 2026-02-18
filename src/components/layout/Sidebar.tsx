@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   TrendingUp,
   ListChecks,
+  Sparkles,
   Trash2,
   X,
   AlertTriangle,
@@ -22,6 +23,7 @@ import { clearAutoSave } from '@/lib/database';
 const navItems = [
   { href: '/', label: 'Home', icon: LayoutDashboard },
   { href: '/checkin', label: 'Check In', icon: ClipboardCheck },
+  { href: '/wishes', label: 'Wishes', icon: Sparkles },
   { href: '/insights', label: 'Insights', icon: TrendingUp },
   { href: '/habits', label: 'Habits', icon: ListChecks },
   { href: '/profile', label: 'Profile', icon: User },

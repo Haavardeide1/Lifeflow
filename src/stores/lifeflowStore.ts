@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid';
 import type {
   Habit,
   HabitType,
+  Wish,
   DailyEntry,
   DateKey,
   HabitCompletion,
@@ -15,6 +16,7 @@ const MAX_HISTORY = 50;
 
 interface LifeflowState {
   habits: Record<string, Habit>;
+  wishes: Record<string, Wish>;
   entries: Record<DateKey, DailyEntry>;
   history: HistoryEntry[];
   historyIndex: number;
@@ -31,6 +33,18 @@ interface LifeflowState {
   deleteHabit: (id: string) => void;
   reorderHabits: (orderedIds: string[]) => void;
 
+  // Wish CRUD
+  addWish: (params: {
+    title: string;
+    kind: Wish['kind'];
+    habitId?: string;
+    metric?: Wish['metric'];
+    targetPerWeek?: number;
+    targetValue?: number;
+  }) => Wish;
+  updateWish: (id: string, updates: Partial<Omit<Wish, 'id'>>) => void;
+  deleteWish: (id: string) => void;
+
   // Entry CRUD
   saveEntry: (params: {
     date: DateKey;
@@ -43,7 +57,7 @@ interface LifeflowState {
   deleteEntry: (date: DateKey) => void;
 
   // Bulk
-  loadData: (habits: Habit[], entries: DailyEntry[]) => void;
+  loadData: (habits: Habit[], entries: DailyEntry[], wishes?: Wish[]) => void;
   clearAll: () => void;
 
   // When habit weights change, recalculate all health scores
@@ -73,6 +87,7 @@ function pushHistory(
 
 export const useLifeflowStore = create<LifeflowState>((set, get) => ({
   habits: {},
+  wishes: {},
   entries: {},
   history: [],
   historyIndex: -1,
@@ -132,6 +147,54 @@ export const useLifeflowStore = create<LifeflowState>((set, get) => ({
     });
   },
 
+  addWish: ({ title, kind, habitId, metric, targetPerWeek, targetValue }) => {
+    const id = uuid();
+    const now = Date.now();
+    const wish: Wish = {
+      id,
+      title,
+      kind,
+      habitId,
+      metric,
+      targetPerWeek,
+      targetValue,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    set((s) => ({
+      wishes: { ...s.wishes, [id]: wish },
+      ...pushHistory(s, `Add wish: ${title}`),
+    }));
+
+    return wish;
+  },
+
+  updateWish: (id, updates) => {
+    const wish = get().wishes[id];
+    if (!wish) return;
+
+    set((s) => ({
+      wishes: {
+        ...s.wishes,
+        [id]: { ...wish, ...updates, updatedAt: Date.now() },
+      },
+      ...pushHistory(s, `Update wish: ${wish.title}`),
+    }));
+  },
+
+  deleteWish: (id) => {
+    const wish = get().wishes[id];
+    if (!wish) return;
+
+    set((s) => {
+      const wishes = { ...s.wishes };
+      delete wishes[id];
+      return { wishes, ...pushHistory(s, `Delete wish: ${wish.title}`) };
+    });
+  },
+
   saveEntry: ({ date, mood, energy, sleep, habitCompletions, notes }) => {
     const now = Date.now();
     const existing = get().entries[date];
@@ -161,15 +224,19 @@ export const useLifeflowStore = create<LifeflowState>((set, get) => ({
     });
   },
 
-  loadData: (habits, entries) => {
+  loadData: (habits, entries, wishes = []) => {
     const habitsRecord: Record<string, Habit> = {};
     habits.forEach((h) => (habitsRecord[h.id] = h));
+
+    const wishesRecord: Record<string, Wish> = {};
+    wishes.forEach((w) => (wishesRecord[w.id] = w));
 
     const entriesRecord: Record<DateKey, DailyEntry> = {};
     entries.forEach((e) => (entriesRecord[e.date] = e));
 
     set({
       habits: habitsRecord,
+      wishes: wishesRecord,
       entries: entriesRecord,
     });
   },
@@ -177,6 +244,7 @@ export const useLifeflowStore = create<LifeflowState>((set, get) => ({
   clearAll: () => {
     set((s) => ({
       habits: {},
+      wishes: {},
       entries: {},
       ...pushHistory(s, 'Clear all data'),
     }));
@@ -201,6 +269,7 @@ export const useLifeflowStore = create<LifeflowState>((set, get) => ({
     const entry = state.history[state.historyIndex];
     set({
       habits: entry.snapshot.habits,
+      wishes: entry.snapshot.wishes,
       entries: entry.snapshot.entries,
       historyIndex: state.historyIndex - 1,
     });
@@ -213,6 +282,7 @@ export const useLifeflowStore = create<LifeflowState>((set, get) => ({
     if (nextEntry) {
       set({
         habits: nextEntry.snapshot.habits,
+        wishes: nextEntry.snapshot.wishes,
         entries: nextEntry.snapshot.entries,
         historyIndex: state.historyIndex + 1,
       });
@@ -224,6 +294,7 @@ export const useLifeflowStore = create<LifeflowState>((set, get) => ({
 
   getSnapshot: () => ({
     habits: { ...get().habits },
+    wishes: { ...get().wishes },
     entries: { ...get().entries },
   }),
 }));

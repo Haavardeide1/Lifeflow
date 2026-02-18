@@ -46,10 +46,26 @@ create table public.habit_completions (
   unique(entry_id, habit_id)
 );
 
+-- 3b. Wishes / goals
+create table public.wishes (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  title text not null,
+  kind text not null check (kind in ('habit', 'metric')),
+  habit_id uuid references public.habits(id) on delete cascade null,
+  metric text null check (metric in ('mood', 'energy', 'sleep', 'healthScore')),
+  target_per_week integer null check (target_per_week between 1 and 7),
+  target_value numeric(4,1) null check (target_value between 1 and 10),
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 -- 4. Row Level Security (each user only sees their own data)
 alter table public.habits enable row level security;
 alter table public.entries enable row level security;
 alter table public.habit_completions enable row level security;
+alter table public.wishes enable row level security;
 
 -- Habits: users can CRUD their own
 create policy "Users can view own habits" on public.habits
@@ -59,6 +75,16 @@ create policy "Users can insert own habits" on public.habits
 create policy "Users can update own habits" on public.habits
   for update using (auth.uid() = user_id);
 create policy "Users can delete own habits" on public.habits
+  for delete using (auth.uid() = user_id);
+
+-- Wishes: users can CRUD their own
+create policy "Users can view own wishes" on public.wishes
+  for select using (auth.uid() = user_id);
+create policy "Users can insert own wishes" on public.wishes
+  for insert with check (auth.uid() = user_id);
+create policy "Users can update own wishes" on public.wishes
+  for update using (auth.uid() = user_id);
+create policy "Users can delete own wishes" on public.wishes
   for delete using (auth.uid() = user_id);
 
 -- Entries: users can CRUD their own
@@ -93,6 +119,7 @@ create policy "Users can delete own completions" on public.habit_completions
 create index idx_habits_user_id on public.habits(user_id);
 create index idx_entries_user_id_date on public.entries(user_id, date);
 create index idx_habit_completions_entry_id on public.habit_completions(entry_id);
+create index idx_wishes_user_id on public.wishes(user_id);
 
 -- =============================================
 -- Optional: if you already created tables before adding new columns

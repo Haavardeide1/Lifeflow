@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Habit, DailyEntry, DateKey, UserProfile, FriendPublicStats, FriendRequest } from '@/types';
+import type { Habit, DailyEntry, DateKey, UserProfile, FriendPublicStats, FriendRequest, Wish } from '@/types';
 
 // ============================================================
 // LOAD all data for the current user
@@ -7,6 +7,7 @@ import type { Habit, DailyEntry, DateKey, UserProfile, FriendPublicStats, Friend
 
 export async function loadUserData(userId: string): Promise<{
   habits: Habit[];
+  wishes: Wish[];
   entries: DailyEntry[];
 }> {
   // Load habits
@@ -29,6 +30,28 @@ export async function loadUserData(userId: string): Promise<{
     active: h.active,
     createdAt: new Date(h.created_at).getTime(),
     updatedAt: new Date(h.updated_at).getTime(),
+  }));
+
+  // Load wishes
+  const { data: wishesData, error: wishesError } = await supabase
+    .from('wishes')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at');
+
+  if (wishesError) throw wishesError;
+
+  const wishes: Wish[] = (wishesData || []).map((w) => ({
+    id: w.id,
+    title: w.title,
+    kind: w.kind as 'habit' | 'metric',
+    habitId: w.habit_id ?? undefined,
+    metric: w.metric ?? undefined,
+    targetPerWeek: w.target_per_week ?? undefined,
+    targetValue: w.target_value ?? undefined,
+    active: w.active,
+    createdAt: new Date(w.created_at).getTime(),
+    updatedAt: new Date(w.updated_at).getTime(),
   }));
 
   // Load entries with completions
@@ -62,7 +85,7 @@ export async function loadUserData(userId: string): Promise<{
     updatedAt: new Date(e.updated_at).getTime(),
   }));
 
-  return { habits, entries };
+  return { habits, wishes, entries };
 }
 
 // ============================================================
@@ -94,6 +117,39 @@ export async function deleteHabitCloud(habitId: string): Promise<void> {
     .from('habits')
     .delete()
     .eq('id', habitId);
+
+  if (error) throw error;
+}
+
+// ============================================================
+// WISHES
+// ============================================================
+
+export async function upsertWish(userId: string, wish: Wish): Promise<void> {
+  const { error } = await supabase
+    .from('wishes')
+    .upsert({
+      id: wish.id,
+      user_id: userId,
+      title: wish.title,
+      kind: wish.kind,
+      habit_id: wish.habitId ?? null,
+      metric: wish.metric ?? null,
+      target_per_week: wish.targetPerWeek ?? null,
+      target_value: wish.targetValue ?? null,
+      active: wish.active,
+      created_at: new Date(wish.createdAt).toISOString(),
+      updated_at: new Date(wish.updatedAt).toISOString(),
+    }, { onConflict: 'id' });
+
+  if (error) throw error;
+}
+
+export async function deleteWishCloud(wishId: string): Promise<void> {
+  const { error } = await supabase
+    .from('wishes')
+    .delete()
+    .eq('id', wishId);
 
   if (error) throw error;
 }

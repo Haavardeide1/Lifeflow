@@ -4,16 +4,25 @@ Last updated: 2026-02-18
 
 ## Current status
 - Latest deployed commit: `a023ba1` (home hero polish + Slopify footer).
-- Local edits made after that deploy:
-  - Removed the "Habit & Mood Tracker" badge on the hero.
-  - Added a "Created and powered by" footer pill with Claude + OpenAI labels.
+- New wishes/goals feature added (local + Supabase sync):
+  - New `Wishes` page with add/edit/remove, 3 graph sections (habit vs actual, overall total, wellbeing goals).
+  - Wishes stored in local IndexedDB and synced to Supabase.
+  - Supabase schema updated to include `public.wishes` + RLS policies + index.
 
 ## Files touched (most recent)
-- `src/app/page.tsx`
+- `src/components/wishes/WishesPage.tsx`
+- `src/app/wishes/page.tsx`
+- `src/components/layout/Sidebar.tsx`
+- `src/types/index.ts`
+- `src/stores/lifeflowStore.ts`
+- `src/hooks/usePersistence.ts`
+- `src/lib/database.ts`
+- `src/lib/supabaseSync.ts`
+- `supabase-setup.sql`
 
 ## What to do next
-1. Preview locally with `npm run dev` and confirm the footer and hero.
-2. If good, commit and push to GitHub to trigger Vercel deploy.
+1. Commit and push to GitHub to trigger Vercel deploy.
+2. If any issues with wishes in prod, verify Supabase table `public.wishes` exists and RLS policies are enabled.
 
 ## Notes
 - Supabase schema was updated earlier to include columns on `habit_completions`:

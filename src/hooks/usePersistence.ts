@@ -4,13 +4,14 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useLifeflowStore } from '@/stores/lifeflowStore';
 import { useAuthStore } from '@/stores/authStore';
 import { autoSave, loadAutoSave } from '@/lib/database';
-import { loadUserData, upsertHabit, upsertEntry, upsertProfile } from '@/lib/supabaseSync';
+import { loadUserData, upsertHabit, upsertEntry, upsertProfile, upsertWish, deleteWishCloud } from '@/lib/supabaseSync';
 import { calculateAllStreaks } from '@/lib/streaks';
 
 const SYNC_DELAY = 2000;
 
 export function usePersistence() {
   const habits = useLifeflowStore((s) => s.habits);
+  const wishes = useLifeflowStore((s) => s.wishes);
   const entries = useLifeflowStore((s) => s.entries);
   const loadData = useLifeflowStore((s) => s.loadData);
   const user = useAuthStore((s) => s.user);
@@ -19,6 +20,7 @@ export function usePersistence() {
   const hasLoadedRef = useRef(false);
   const lastSaveRef = useRef<string>('');
   const prevHabitsRef = useRef<typeof habits>({});
+  const prevWishesRef = useRef<typeof wishes>({});
   const prevEntriesRef = useRef<typeof entries>({});
 
   // Load data: from Supabase if logged in, fallback to IndexedDB
@@ -27,40 +29,42 @@ export function usePersistence() {
 
     const load = async () => {
       try {
+        const saved = await loadAutoSave();
+        const savedHabits = saved ? Object.values(saved.habits) : [];
+        const savedEntries = saved ? Object.values(saved.entries) : [];
+        const savedWishes = saved?.wishes ? Object.values(saved.wishes) : [];
+
         if (user) {
           // Load from Supabase
           const data = await loadUserData(user.id);
-          if (data.habits.length > 0 || data.entries.length > 0) {
-            loadData(data.habits, data.entries);
+          if (data.habits.length > 0 || data.entries.length > 0 || data.wishes.length > 0) {
+            const wishesToUse = data.wishes.length > 0 ? data.wishes : savedWishes;
+            loadData(data.habits, data.entries, wishesToUse);
             // Also cache locally
             const habitsRecord: Record<string, typeof data.habits[0]> = {};
             data.habits.forEach(h => habitsRecord[h.id] = h);
             const entriesRecord: Record<string, typeof data.entries[0]> = {};
             data.entries.forEach(e => entriesRecord[e.date] = e);
-            await autoSave(habitsRecord, entriesRecord);
+            const wishesRecord: Record<string, typeof wishesToUse[0]> = {};
+            wishesToUse.forEach(w => wishesRecord[w.id] = w);
+            await autoSave(habitsRecord, wishesRecord, entriesRecord);
             hasLoadedRef.current = true;
             return;
           }
 
           // If Supabase is empty, fallback to local cache to avoid "lost" data
-          const saved = await loadAutoSave();
           if (saved) {
-            const habitArray = Object.values(saved.habits);
-            const entryArray = Object.values(saved.entries);
-            if (habitArray.length > 0 || entryArray.length > 0) {
-              loadData(habitArray, entryArray);
+            if (savedHabits.length > 0 || savedEntries.length > 0 || savedWishes.length > 0) {
+              loadData(savedHabits, savedEntries, savedWishes);
             }
           }
 
           hasLoadedRef.current = true;
         } else {
           // Fallback to IndexedDB for offline/not-logged-in
-          const saved = await loadAutoSave();
           if (saved) {
-            const habitArray = Object.values(saved.habits);
-            const entryArray = Object.values(saved.entries);
-            if (habitArray.length > 0 || entryArray.length > 0) {
-              loadData(habitArray, entryArray);
+            if (savedHabits.length > 0 || savedEntries.length > 0 || savedWishes.length > 0) {
+              loadData(savedHabits, savedEntries, savedWishes);
             }
           }
           hasLoadedRef.current = true;
@@ -70,7 +74,11 @@ export function usePersistence() {
         // Fallback to IndexedDB on Supabase failure
         const saved = await loadAutoSave();
         if (saved) {
-          loadData(Object.values(saved.habits), Object.values(saved.entries));
+          loadData(
+            Object.values(saved.habits),
+            Object.values(saved.entries),
+            saved.wishes ? Object.values(saved.wishes) : []
+          );
         }
         hasLoadedRef.current = true;
       }
@@ -83,16 +91,19 @@ export function usePersistence() {
   useEffect(() => {
     const stateHash = JSON.stringify({
       habitCount: Object.keys(habits).length,
+      wishCount: Object.keys(wishes).length,
       entryCount: Object.keys(entries).length,
       lastUpdate: Math.max(
         ...Object.values(habits).map(h => h.updatedAt).concat(
+          Object.values(wishes).map(w => w.updatedAt)
+        ).concat(
           Object.values(entries).map(e => e.updatedAt)
         ).concat([0])
       ),
     });
 
     if (stateHash === lastSaveRef.current) return;
-    if (Object.keys(habits).length === 0 && Object.keys(entries).length === 0) return;
+    if (Object.keys(habits).length === 0 && Object.keys(entries).length === 0 && Object.keys(wishes).length === 0) return;
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -101,7 +112,7 @@ export function usePersistence() {
     saveTimeoutRef.current = setTimeout(async () => {
       try {
         // Always save to IndexedDB (fast, offline)
-        await autoSave(habits, entries);
+        await autoSave(habits, wishes, entries);
         lastSaveRef.current = stateHash;
 
         // Sync changed items to Supabase if logged in
@@ -114,6 +125,28 @@ export function usePersistence() {
                 await upsertHabit(user.id, habit);
               } catch (e) {
                 console.error('Failed to sync habit:', e);
+              }
+            }
+          }
+
+          // Sync wishes
+          const wishIds = new Set(Object.keys(wishes));
+          for (const [id, wish] of Object.entries(wishes)) {
+            const prev = prevWishesRef.current[id];
+            if (!prev || prev.updatedAt !== wish.updatedAt) {
+              try {
+                await upsertWish(user.id, wish);
+              } catch (e) {
+                console.error('Failed to sync wish:', e);
+              }
+            }
+          }
+          for (const [id, prevWish] of Object.entries(prevWishesRef.current)) {
+            if (!wishIds.has(id)) {
+              try {
+                await deleteWishCloud(id);
+              } catch (e) {
+                console.error('Failed to delete wish:', e);
               }
             }
           }
@@ -141,6 +174,7 @@ export function usePersistence() {
         }
 
         prevHabitsRef.current = { ...habits };
+        prevWishesRef.current = { ...wishes };
         prevEntriesRef.current = { ...entries };
       } catch (error) {
         console.error('Failed to save:', error);
@@ -156,12 +190,12 @@ export function usePersistence() {
 
   const save = useCallback(async () => {
     try {
-      await autoSave(habits, entries);
+      await autoSave(habits, wishes, entries);
     } catch (error) {
       console.error('Failed to save:', error);
       throw error;
     }
-  }, [habits, entries]);
+  }, [habits, wishes, entries]);
 
   return { save };
 }
