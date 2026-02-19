@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { Mountain, X, SendHorizonal } from 'lucide-react';
 
 type Role = 'user' | 'assistant';
@@ -24,7 +24,105 @@ const quickStarts = [
   'Too much stress',
 ];
 
-function buildResponse(input: string) {
+type Intent =
+  | 'sleep_gym'
+  | 'sleep_screen'
+  | 'stress'
+  | 'food'
+  | 'gym'
+  | 'general';
+
+const RESPONSE_BANK: Record<Intent, Array<{ reply: string; question: string }>> = {
+  sleep_gym: [
+    {
+      reply:
+        'This is a true trade. If training lifts your long game but cuts your sleep, choose the smaller session earlier and protect the bedtime.',
+      question: 'What time could you realistically train on weekdays?',
+    },
+    {
+      reply:
+        'Treat sleep as the anchor. Build training around it — shorter, earlier, and consistent beats late, intense, and sporadic.',
+      question: 'Which days would be easiest for a shorter session?',
+    },
+    {
+      reply:
+        'If the gym steals sleep, the cost is higher than it looks. Try a 2‑week experiment: earlier sessions, fixed bedtime, then compare.',
+      question: 'What’s a realistic bedtime you can defend?',
+    },
+  ],
+  sleep_screen: [
+    {
+      reply:
+        'Screens aren’t evil; timing is. Create a 30–45 minute landing zone before bed and your sleep steadies without a full purge.',
+      question: 'Which app steals your nights most?',
+    },
+    {
+      reply:
+        'You don’t need a detox. You need a boundary. Move screens to earlier and keep the last chunk of the night quiet.',
+      question: 'What would you do in the last 30 minutes instead?',
+    },
+  ],
+  stress: [
+    {
+      reply:
+        'When stress rises, the smallest ritual wins. Choose a calming action so easy you can’t refuse, then anchor it to the same cue daily.',
+      question: 'Which part of your day feels most chaotic?',
+    },
+    {
+      reply:
+        'Stress makes big plans collapse. Go tiny: one breath ritual, one walk, one reset you can keep even on bad days.',
+      question: 'What tiny reset would feel natural for you?',
+    },
+  ],
+  food: [
+    {
+      reply:
+        'Food changes stick when you upgrade, not restrict. Add one stable meal you can repeat before changing anything else.',
+      question: 'Which meal is the messiest for you right now?',
+    },
+    {
+      reply:
+        'Start with one repeatable meal. Once it’s solid, everything else gets easier to shape.',
+      question: 'What’s one meal you could keep consistent this week?',
+    },
+  ],
+  gym: [
+    {
+      reply:
+        'Consistency comes from lowering the bar. A short, repeatable session beats the perfect plan you skip.',
+      question: 'What’s the minimum session you’d do even on a busy day?',
+    },
+    {
+      reply:
+        'Momentum beats intensity. A simple, repeatable plan will beat a complicated one you avoid.',
+      question: 'How many days per week feels realistic to start?',
+    },
+  ],
+  general: [
+    {
+      reply:
+        'Choose one lever that matters most. We’ll make it small, then test for a week.',
+      question: 'What feels like the biggest bottleneck?',
+    },
+    {
+      reply:
+        'Pick the smallest change that gives you disproportionate relief. We’re aiming for leverage, not perfection.',
+      question: 'Where do you want the most relief this week?',
+    },
+  ],
+};
+
+function pickResponse(intent: Intent, input: string, turn: number) {
+  const bank = RESPONSE_BANK[intent];
+  if (bank.length === 1) return bank[0];
+
+  const seed =
+    input.split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0) + turn * 7;
+  const index = seed % bank.length;
+  return bank[index];
+}
+
+function detectIntent(input: string): Intent {
   const text = input.toLowerCase();
 
   const hasSleep = /sleep|tired|insomnia|late/.test(text);
@@ -33,51 +131,12 @@ function buildResponse(input: string) {
   const hasStress = /stress|anxious|overwhelmed/.test(text);
   const hasFood = /diet|food|junk|sugar|snack/.test(text);
 
-  if (hasSleep && hasGym) {
-    return {
-      reply:
-        'This is a true trade. If training lifts your long game but cuts your sleep, choose the smaller session earlier and protect the bedtime.',
-      question: 'What time could you realistically train on weekdays?',
-    };
-  }
-
-  if (hasSleep && hasScreen) {
-    return {
-      reply:
-        'Screens aren’t evil; timing is. Create a 30–45 minute landing zone before bed and your sleep steadies without a full purge.',
-      question: 'Which app steals your nights most?',
-    };
-  }
-
-  if (hasStress) {
-    return {
-      reply:
-        'When stress rises, the smallest ritual wins. Choose a calming action so easy you can’t refuse, then anchor it to the same cue daily.',
-      question: 'Which part of your day feels most chaotic?',
-    };
-  }
-
-  if (hasFood) {
-    return {
-      reply:
-        'Food changes stick when you upgrade, not restrict. Add one stable meal you can repeat before changing anything else.',
-      question: 'Which meal is the messiest for you right now?',
-    };
-  }
-
-  if (hasGym) {
-    return {
-      reply:
-        'Consistency comes from lowering the bar. A short, repeatable session beats the perfect plan you skip.',
-        question: 'What’s the minimum session you’d do even on a busy day?',
-    };
-  }
-
-  return {
-    reply:
-      'Choose one lever that matters most. We’ll make it small, then test for a week.',
-    question: 'What feels like the biggest bottleneck?',
-  };
+  if (hasSleep && hasGym) return 'sleep_gym';
+  if (hasSleep && hasScreen) return 'sleep_screen';
+  if (hasStress) return 'stress';
+  if (hasFood) return 'food';
+  if (hasGym) return 'gym';
+  return 'general';
 }
 
 export function FlowGuruWidget() {
@@ -88,6 +147,8 @@ export function FlowGuruWidget() {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [pendingMessages, setPendingMessages] = useState<Message[]>([]);
+  const [turnCount, setTurnCount] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const lastAssistant = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i -= 1) {
@@ -100,10 +161,11 @@ export function FlowGuruWidget() {
     const raw = localStorage.getItem('lifeflow.flowguru.v1');
     if (raw) {
       try {
-        const parsed = JSON.parse(raw) as { messages?: Message[]; pinned?: boolean; open?: boolean };
+        const parsed = JSON.parse(raw) as { messages?: Message[]; pinned?: boolean; open?: boolean; turnCount?: number };
         if (parsed.messages?.length) setMessages(parsed.messages);
         if (typeof parsed.pinned === 'boolean') setPinned(parsed.pinned);
         if (typeof parsed.open === 'boolean') setOpen(parsed.open);
+        if (typeof parsed.turnCount === 'number') setTurnCount(parsed.turnCount);
       } catch {
         // ignore corrupted state
       }
@@ -115,9 +177,9 @@ export function FlowGuruWidget() {
     if (!hasLoaded) return;
     localStorage.setItem(
       'lifeflow.flowguru.v1',
-      JSON.stringify({ messages, pinned, open })
+      JSON.stringify({ messages, pinned, open, turnCount })
     );
-  }, [messages, pinned, open, hasLoaded]);
+  }, [messages, pinned, open, hasLoaded, turnCount]);
 
   const clearMemory = () => {
     localStorage.removeItem('lifeflow.flowguru.v1');
@@ -129,7 +191,8 @@ export function FlowGuruWidget() {
   const send = () => {
     const trimmed = input.trim();
     if (!trimmed) return;
-    const { reply, question } = buildResponse(trimmed);
+    const intent = detectIntent(trimmed);
+    const { reply, question } = pickResponse(intent, trimmed, turnCount);
     setMessages((prev) => [
       ...prev,
       { id: `u-${Date.now()}`, role: 'user', text: trimmed },
@@ -140,6 +203,7 @@ export function FlowGuruWidget() {
     ]);
     setIsTyping(true);
     setInput('');
+    setTurnCount((v) => v + 1);
   };
 
   const handleQuickStart = (text: string) => {
@@ -162,6 +226,12 @@ export function FlowGuruWidget() {
   useEffect(() => {
     if (isTyping && pendingMessages.length === 0) setIsTyping(false);
   }, [isTyping, pendingMessages.length]);
+
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [messages, isTyping]);
 
   return (
     <div className="fixed bottom-20 md:bottom-4 right-4 z-[60]">
@@ -203,7 +273,7 @@ export function FlowGuruWidget() {
             </button>
           </div>
 
-          <div className="px-4 py-3 space-y-3 max-h-[340px] overflow-y-auto">
+          <div ref={listRef} className="px-4 py-3 space-y-3 max-h-[340px] overflow-y-auto">
             {messages.map((msg) => (
               <div
                 key={msg.id}
