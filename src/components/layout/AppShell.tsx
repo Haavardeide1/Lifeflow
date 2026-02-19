@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Mountain } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { ThemeProvider } from './ThemeProvider';
@@ -8,18 +8,52 @@ import { usePersistence } from '@/hooks/usePersistence';
 import { useAuthStore } from '@/stores/authStore';
 import { useProfileStore } from '@/stores/profileStore';
 import { AuthScreen } from '@/components/auth/AuthScreen';
+import { useLifeflowStore } from '@/stores/lifeflowStore';
+import { AIOnboardingModal } from '@/components/onboarding/AIOnboardingModal';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const loading = useAuthStore((s) => s.loading);
   const initialize = useAuthStore((s) => s.initialize);
   const profile = useProfileStore((s) => s.profile);
+  const habitsCount = useLifeflowStore((s) => Object.keys(s.habits).length);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [forceOnboarding, setForceOnboarding] = useState(false);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
 
   usePersistence();
+
+  useEffect(() => {
+    if (!user || !profile?.username) return;
+    if (habitsCount > 0 && !forceOnboarding) return;
+
+    const key = `lifeflow.onboarding.${user.id}`;
+    const alreadyShown = localStorage.getItem(key);
+    if (!alreadyShown || forceOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, [user, profile?.username, habitsCount, forceOnboarding]);
+
+  useEffect(() => {
+    const handler = () => {
+      setForceOnboarding(true);
+      setShowOnboarding(true);
+    };
+    window.addEventListener('lifeflow:onboarding', handler);
+    return () => window.removeEventListener('lifeflow:onboarding', handler);
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    if (user) {
+      const key = `lifeflow.onboarding.${user.id}`;
+      localStorage.setItem(key, '1');
+    }
+    setShowOnboarding(false);
+    setForceOnboarding(false);
+  };
 
   if (loading) {
     return (
@@ -79,6 +113,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+      {user && profile?.username && (
+        <AIOnboardingModal
+          open={showOnboarding}
+          username={profile.displayName || profile.username}
+          onComplete={handleOnboardingComplete}
+        />
+      )}
     </>
   );
 }

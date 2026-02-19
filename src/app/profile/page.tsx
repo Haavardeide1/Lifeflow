@@ -241,6 +241,26 @@ export default function ProfilePage() {
           </div>
         </Card>
 
+        {/* Onboarding */}
+        <Card title="Onboarding">
+          <div className="px-5 py-4 space-y-3">
+            <p className="text-[13px] text-gray-500 dark:text-white/50">
+              Re-open the AI onboarding to get fresh habit suggestions.
+            </p>
+            <button
+              onClick={() => {
+                if (!user) return;
+                const key = `lifeflow.onboarding.${user.id}`;
+                localStorage.removeItem(key);
+                window.dispatchEvent(new Event('lifeflow:onboarding'));
+              }}
+              className="w-full py-2.5 rounded-xl text-[13px] font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+            >
+              Open AI onboarding
+            </button>
+          </div>
+        </Card>
+
         {/* Friends */}
         <Card>
           {/* Tabs */}
