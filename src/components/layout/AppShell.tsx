@@ -10,6 +10,7 @@ import { useProfileStore } from '@/stores/profileStore';
 import { AuthScreen } from '@/components/auth/AuthScreen';
 import { useLifeflowStore } from '@/stores/lifeflowStore';
 import { AIOnboardingModal } from '@/components/onboarding/AIOnboardingModal';
+import { FlowGuruWidget } from '@/components/coach/FlowGuruWidget';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
@@ -113,6 +114,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+      <FlowGuruWidget />
       {user && profile?.username && (
         <AIOnboardingModal
           open={showOnboarding}
