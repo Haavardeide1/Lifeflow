@@ -74,12 +74,12 @@ export function CheckInForm() {
     setCompletions(prev => {
       const current = prev[habitId];
       if (current?.completed) {
-        // Toggle OFF → remove immediately
+        // Toggle OFF -> remove immediately
         const next = { ...prev };
         delete next[habitId];
         return next;
       } else {
-        // Toggle ON → open feedback modal (don't mark completed yet)
+        // Toggle ON -> open feedback modal (don't mark completed yet)
         setFeedbackModalHabitId(habitId);
         return prev;
       }
@@ -108,7 +108,7 @@ export function CheckInForm() {
   }, [feedbackModalHabitId]);
 
   const handleFeedbackClose = useCallback(() => {
-    // Cancel — habit stays unchecked
+    // Cancel - habit stays unchecked
     setFeedbackModalHabitId(null);
   }, []);
 
@@ -229,24 +229,24 @@ export function CheckInForm() {
               label="Mood"
               value={mood}
               onChange={(v) => { setMood(v); setSaved(false); }}
-              leftEmoji="😔"
-              rightEmoji="😊"
+              leftEmoji=":("
+              rightEmoji=":)"
               color="#3b82f6"
             />
             <SliderInput
               label="Energy"
               value={energy}
               onChange={(v) => { setEnergy(v); setSaved(false); }}
-              leftEmoji="🪫"
-              rightEmoji="⚡"
+              leftEmoji="low"
+              rightEmoji="high"
               color="#f97316"
             />
             <SliderInput
               label="Sleep Quality"
               value={sleep}
               onChange={(v) => { setSleep(v); setSaved(false); }}
-              leftEmoji="😴"
-              rightEmoji="🌟"
+              leftEmoji="zzz"
+              rightEmoji="good"
               color="#a855f7"
             />
           </div>

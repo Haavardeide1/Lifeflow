@@ -57,7 +57,12 @@ interface LifeflowState {
   deleteEntry: (date: DateKey) => void;
 
   // Bulk
-  loadData: (habits: Habit[], entries: DailyEntry[], wishes?: Wish[]) => void;
+  loadData: (
+    habits: Habit[],
+    entries: DailyEntry[],
+    wishes?: Wish[],
+    options?: { history?: HistoryEntry[]; historyIndex?: number }
+  ) => void;
   clearAll: () => void;
 
   // When habit weights change, recalculate all health scores
@@ -225,7 +230,7 @@ export const useLifeflowStore = create<LifeflowState>((set, get) => ({
     });
   },
 
-  loadData: (habits, entries, wishes = []) => {
+  loadData: (habits, entries, wishes = [], options) => {
     const habitsRecord: Record<string, Habit> = {};
     habits.forEach((h) => (habitsRecord[h.id] = h));
 
@@ -235,11 +240,13 @@ export const useLifeflowStore = create<LifeflowState>((set, get) => ({
     const entriesRecord: Record<DateKey, DailyEntry> = {};
     entries.forEach((e) => (entriesRecord[e.date] = e));
 
-    set({
+    set((state) => ({
       habits: habitsRecord,
       wishes: wishesRecord,
       entries: entriesRecord,
-    });
+      history: options?.history ?? state.history,
+      historyIndex: options?.historyIndex ?? state.historyIndex,
+    }));
   },
 
   clearAll: () => {

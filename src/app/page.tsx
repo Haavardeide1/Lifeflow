@@ -60,7 +60,7 @@ export default function HomePage() {
           <div className="absolute -left-10 top-6 w-36 h-36 rounded-full bg-teal-400/10 blur-3xl" />
         </div>
 
-        {/* ── Hero ── */}
+        {/* -- Hero -- */}
         <div className="relative text-center py-12 animate-fade-in-up">
           {/* Glow ring behind icon */}
           <div className="absolute inset-0 flex items-start justify-center pt-4 pointer-events-none">
@@ -80,12 +80,12 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── Quick Check-in ── */}
+        {/* -- Quick Check-in -- */}
         <div className="animate-fade-in-up delay-100">
           <QuickCheckinCTA />
         </div>
 
-        {/* ── Friends Activity ── */}
+        {/* -- Friends Activity -- */}
         {friends.length > 0 && (
           <div className="animate-fade-in-up delay-200">
             <Card title="Friends">
@@ -134,7 +134,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* ── Dashboard Stats ── */}
+        {/* -- Dashboard Stats -- */}
         {hasEntries && (
           <>
             <div className="flex items-center justify-between animate-fade-in-up delay-200">
@@ -189,7 +189,7 @@ export default function HomePage() {
           </>
         )}
 
-        {/* ── About Section ── */}
+        {/* -- About Section -- */}
         <div className="space-y-12 pt-6">
           <div className="h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
 
@@ -199,7 +199,7 @@ export default function HomePage() {
               LifeFlow is built on two powerful truths: small habits shape who you become, and the biggest obstacle to change is often yourself.
             </p>
             <p className="text-[14px] text-gray-500 dark:text-white/50 leading-relaxed">
-              You don&apos;t need a new personality. You don&apos;t need a dramatic reset. You need small, repeatable actions — and the awareness to see what they&apos;re actually doing to you.
+              You don&apos;t need a new personality. You don&apos;t need a dramatic reset. You need small, repeatable actions -- and the awareness to see what they&apos;re actually doing to you.
             </p>
           </div>
 
@@ -228,14 +228,14 @@ export default function HomePage() {
               ))}
             </div>
             <p className="text-[14px] text-gray-500 dark:text-white/50 leading-relaxed">
-              Because change isn&apos;t theoretical — it&apos;s measurable. And often, it&apos;s subtle.
+              Because change isn&apos;t theoretical -- it&apos;s measurable. And often, it&apos;s subtle.
             </p>
 
             {/* Highlighted quote */}
             <div className="relative pl-5 border-l-2 border-emerald-500/50 py-1">
               <Quote size={14} className="absolute -left-[7px] -top-0.5 text-emerald-500/50 bg-white dark:bg-[#0a0a0a]" />
               <p className="text-[14px] text-gray-700 dark:text-white/70 leading-relaxed font-medium italic">
-                1% better doesn&apos;t look impressive today. But 1% easier, 1% calmer, 1% more disciplined — compounded — changes everything.
+                1% better doesn&apos;t look impressive today. But 1% easier, 1% calmer, 1% more disciplined -- compounded -- changes everything.
               </p>
             </div>
           </div>
@@ -278,14 +278,14 @@ export default function HomePage() {
           {/* Accountability */}
           <div className="space-y-5 animate-fade-in-up">
             <h2 className="text-[20px] font-bold tracking-tight">
-              Accountability — On Your Terms
+              Accountability -- On Your Terms
             </h2>
             <div className="space-y-3">
               <p className="text-[14px] text-gray-500 dark:text-white/50 leading-relaxed">
                 Habits are deeply personal. Sometimes you don&apos;t want to explain why you&apos;re trying to use your phone less, wake up earlier, train more, or drink less. And you shouldn&apos;t have to.
               </p>
               <p className="text-[14px] text-gray-500 dark:text-white/50 leading-relaxed">
-                LifeFlow gives you private accountability — a place where your commitments live without judgment.
+                LifeFlow gives you private accountability -- a place where your commitments live without judgment.
               </p>
               <p className="text-[14px] text-gray-600 dark:text-white/60 leading-relaxed">
                 But growth doesn&apos;t have to be isolated. You can share progress without sharing details. You can celebrate consistency without explaining your struggle. Because sometimes, knowing someone sees your effort is enough.
@@ -306,7 +306,7 @@ export default function HomePage() {
                 The resistance. The excuses. The delay. The comfort zone.
               </p>
               <p className="text-[14px] text-gray-600 dark:text-white/60 leading-relaxed relative">
-                LifeFlow doesn&apos;t fight the mountain for you. It helps you see it clearly — and climb it one step at a time.
+                LifeFlow doesn&apos;t fight the mountain for you. It helps you see it clearly -- and climb it one step at a time.
               </p>
             </div>
           </div>

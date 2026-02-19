@@ -334,7 +334,7 @@ export function WishesPage() {
         ) : (
           <>
             <Card
-              title={`Habit Wishes vs Actual (${weekData.start} → ${weekData.end})`}
+              title={`Habit Wishes vs Actual (${weekData.start} -> ${weekData.end})`}
               action={<Target size={14} className="text-emerald-400" />}
             >
               <div className="px-5 py-4 space-y-4">

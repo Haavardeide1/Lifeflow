@@ -169,8 +169,8 @@ export function HabitFeedbackModal({
             label="Energy"
             value={energy}
             onChange={setEnergy}
-            leftEmoji="🪫"
-            rightEmoji="⚡"
+            leftEmoji="low"
+            rightEmoji="high"
             color="#f97316"
           />
 
@@ -179,8 +179,8 @@ export function HabitFeedbackModal({
             label="Mood"
             value={mood}
             onChange={setMood}
-            leftEmoji="😔"
-            rightEmoji="😊"
+            leftEmoji=":("
+            rightEmoji=":)"
             color="#3b82f6"
           />
 

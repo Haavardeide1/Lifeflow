@@ -355,29 +355,38 @@ export async function fetchFriendsList(userId: string): Promise<FriendPublicStat
 
   if (!profiles) return [];
 
-  // Get latest entry for each friend (health score + date)
-  const results: FriendPublicStats[] = [];
-  for (const p of profiles) {
-    const { data: latestEntry } = await supabase
-      .from('entries')
-      .select('health_score, date')
-      .eq('user_id', p.id)
-      .order('date', { ascending: false })
-      .limit(1)
-      .single();
+  // Get latest entries for all friends in one query (avoid N+1)
+  const { data: latestEntries, error: latestError } = await supabase
+    .from('entries')
+    .select('user_id, health_score, date')
+    .in('user_id', friendIds)
+    .order('date', { ascending: false });
 
-    results.push({
+  if (latestError) throw latestError;
+
+  const latestByUser = new Map<string, { healthScore: number; date: string }>();
+  for (const row of latestEntries || []) {
+    if (!latestByUser.has(row.user_id)) {
+      latestByUser.set(row.user_id, {
+        healthScore: row.health_score ? Number(row.health_score) : 0,
+        date: row.date,
+      });
+      if (latestByUser.size === friendIds.length) break;
+    }
+  }
+
+  return profiles.map((p) => {
+    const latest = latestByUser.get(p.id);
+    return {
       userId: p.id,
       username: p.username || 'unknown',
       displayName: p.display_name,
       avatarColor: p.avatar_color,
       currentStreakDays: p.current_streak_days,
-      latestHealthScore: latestEntry?.health_score ? Number(latestEntry.health_score) : null,
-      lastCheckinDate: latestEntry?.date || null,
-    });
-  }
-
-  return results;
+      latestHealthScore: latest ? latest.healthScore : null,
+      lastCheckinDate: latest ? latest.date : null,
+    };
+  });
 }
 
 export async function fetchPendingRequests(userId: string): Promise<FriendRequest[]> {

@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { Habit, DailyEntry, DateKey, Wish } from '@/types';
+import type { Habit, DailyEntry, DateKey, Wish, HistoryEntry } from '@/types';
 
 export interface StoredState {
   id: string;
@@ -7,6 +7,8 @@ export interface StoredState {
   habits: Record<string, Habit>;
   wishes: Record<string, Wish>;
   entries: Record<DateKey, DailyEntry>;
+  history?: HistoryEntry[];
+  historyIndex?: number;
   updatedAt: number;
 }
 
@@ -34,7 +36,9 @@ export async function autoSave(
   habits: Record<string, Habit>,
   wishes: Record<string, Wish>,
   entries: Record<DateKey, DailyEntry>,
-  userId?: string
+  userId?: string,
+  history?: HistoryEntry[],
+  historyIndex?: number
 ): Promise<void> {
   await db.state.put({
     id: getAutoSaveId(userId),
@@ -42,6 +46,8 @@ export async function autoSave(
     habits,
     wishes,
     entries,
+    history,
+    historyIndex,
     updatedAt: Date.now(),
   });
 }
