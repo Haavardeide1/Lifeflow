@@ -82,7 +82,7 @@ export interface DailyEntry {
   habitCompletions: HabitCompletion[];
   /** Optional free-text notes */
   notes: string;
-  /** Pre-computed health score for this day */
+  /** Pre-computed consistency score for this day */
   healthScore: number;
   createdAt: number;
   updatedAt: number;

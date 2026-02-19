@@ -12,7 +12,7 @@ export function exportToCSV(
   entries: Record<DateKey, DailyEntry>
 ): string {
   const activeHabits = Object.values(habits).filter(h => h.active).sort((a, b) => a.sortOrder - b.sortOrder);
-  const headers = ['Date', 'Mood', 'Energy', 'Sleep', 'Health Score', ...activeHabits.map(h => h.name), 'Notes'];
+  const headers = ['Date', 'Mood', 'Energy', 'Sleep', 'Consistency Score', ...activeHabits.map(h => h.name), 'Notes'];
 
   const rows = Object.values(entries)
     .sort((a, b) => a.date.localeCompare(b.date))

@@ -179,6 +179,7 @@ export function HealthScoreGraph({ entries, period }: HealthScoreGraphProps) {
           }}
         >
           <p className="text-[11px] text-gray-500 dark:text-white/50">{formatShortDate(tooltip.entry.date)}</p>
+          <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-white/40">Consistency</p>
           <p className="text-[16px] font-bold text-emerald-400">{tooltip.entry.healthScore}</p>
           <div className="flex gap-3 mt-1">
             <span className="text-[10px] text-blue-400">Mood {tooltip.entry.mood}</span>

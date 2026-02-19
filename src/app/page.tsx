@@ -160,7 +160,7 @@ export default function HomePage() {
             <TodayStats />
 
             <Card
-              title="Health Score"
+              title="Consistency Score"
               action={
                 <div className="flex gap-1">
                   {PERIODS.map(p => (

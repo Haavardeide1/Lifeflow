@@ -111,13 +111,13 @@ function SummaryStats({
   return (
     <div className="grid grid-cols-2 gap-4">
       <div>
-        <p className="text-[11px] text-gray-400 dark:text-white/30">Avg Health Score</p>
+        <p className="text-[11px] text-gray-400 dark:text-white/30">Avg Consistency Score</p>
         <p className="text-[20px] font-bold text-emerald-400">{avgScore.toFixed(1)}</p>
       </div>
       <div>
         <p className="text-[11px] text-gray-400 dark:text-white/30">Best Day</p>
         <p className="text-[14px] font-semibold text-gray-700 dark:text-white/80">{bestDay.date}</p>
-        <p className="text-[11px] text-emerald-400/60">Score: {bestDay.healthScore}</p>
+        <p className="text-[11px] text-emerald-400/60">Consistency: {bestDay.healthScore}</p>
       </div>
       <div>
         <p className="text-[11px] text-gray-400 dark:text-white/30">Avg Mood</p>

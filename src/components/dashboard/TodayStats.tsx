@@ -23,34 +23,56 @@ export function TodayStats() {
   }).length;
   const badTotal = activeHabits.filter(h => h.type === 'bad').length;
 
-  const scoreColor = todayEntry.healthScore >= 7 ? '#22c55e'
-    : todayEntry.healthScore >= 4 ? '#eab308' : '#ef4444';
+  const consistencyScore = todayEntry.healthScore;
+  const wellbeingScore = (todayEntry.mood + todayEntry.energy + todayEntry.sleep) / 3;
+
+  const scoreColor = consistencyScore >= 7 ? '#22c55e'
+    : consistencyScore >= 4 ? '#eab308' : '#ef4444';
+
+  const getTier = (value: number) => (value >= 7 ? 'high' : value <= 4 ? 'low' : 'mid');
+  const consistencyTier = getTier(consistencyScore);
+  const wellbeingTier = getTier(wellbeingScore);
+
+  const insightMap: Record<string, string> = {
+    'high-high': 'Aligned: strong consistency and strong wellbeing.',
+    'high-low': 'Pushing hard: consistency is high, wellbeing is low.',
+    'low-high': 'Recovery day: wellbeing is high with low consistency.',
+    'low-low': 'Drift phase: low consistency and low wellbeing.',
+  };
+  const insightKey = `${consistencyTier}-${wellbeingTier}`;
+  const insightText = insightMap[insightKey] ?? 'Mixed signals today. Notice what supported or drained you.';
 
   return (
     <Card>
       <div className="px-5 py-4">
         <div className="flex items-start justify-between">
-          {/* Health Score */}
+          {/* Consistency Score */}
           <div>
-            <p className="text-[12px] text-gray-400 dark:text-white/40 uppercase tracking-wider font-medium">Health Score</p>
+            <p className="text-[12px] text-gray-400 dark:text-white/40 uppercase tracking-wider font-medium">Consistency Score</p>
             <p className="text-[40px] font-bold leading-none mt-1" style={{ color: scoreColor }}>
-              {todayEntry.healthScore}
+              {consistencyScore}
             </p>
+            <p className="text-[11px] text-gray-400 dark:text-white/35 mt-1">What you did</p>
           </div>
 
-          {/* Metrics */}
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-[11px] text-gray-400 dark:text-white/30">Mood</p>
-              <p className="text-[18px] font-semibold text-blue-400">{todayEntry.mood}</p>
-            </div>
-            <div>
-              <p className="text-[11px] text-gray-400 dark:text-white/30">Energy</p>
-              <p className="text-[18px] font-semibold text-orange-400">{todayEntry.energy}</p>
-            </div>
-            <div>
-              <p className="text-[11px] text-gray-400 dark:text-white/30">Sleep</p>
-              <p className="text-[18px] font-semibold text-purple-400">{todayEntry.sleep}</p>
+          {/* Wellbeing / State */}
+          <div className="text-right">
+            <p className="text-[12px] text-gray-400 dark:text-white/40 uppercase tracking-wider font-medium">Wellbeing</p>
+            <p className="text-[24px] font-semibold text-white/80 dark:text-white/80">{wellbeingScore.toFixed(1)}</p>
+            <p className="text-[11px] text-gray-400 dark:text-white/35 mt-1">How you felt</p>
+            <div className="grid grid-cols-3 gap-3 text-center mt-3">
+              <div>
+                <p className="text-[10px] text-gray-400 dark:text-white/30">Mood</p>
+                <p className="text-[16px] font-semibold text-blue-400">{todayEntry.mood}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-400 dark:text-white/30">Energy</p>
+                <p className="text-[16px] font-semibold text-orange-400">{todayEntry.energy}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-400 dark:text-white/30">Sleep</p>
+                <p className="text-[16px] font-semibold text-purple-400">{todayEntry.sleep}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -69,6 +91,11 @@ export function TodayStats() {
               {badTotal - badDone}/{badTotal} bad habits avoided
             </span>
           </div>
+        </div>
+
+        {/* Insight */}
+        <div className="mt-3 text-[12px] text-gray-500 dark:text-white/50">
+          {insightText}
         </div>
       </div>
     </Card>

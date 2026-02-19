@@ -65,7 +65,7 @@ interface LifeflowState {
   ) => void;
   clearAll: () => void;
 
-  // When habit weights change, recalculate all health scores
+  // When habit weights change, recalculate all consistency scores
   recalculateScores: () => void;
 
   // Undo/redo

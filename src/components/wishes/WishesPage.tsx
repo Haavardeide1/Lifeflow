@@ -12,7 +12,7 @@ const METRIC_OPTIONS: { value: WishMetric; label: string; color: string }[] = [
   { value: 'energy', label: 'Energy', color: '#f97316' },
   { value: 'mood', label: 'Mood', color: '#3b82f6' },
   { value: 'sleep', label: 'Sleep', color: '#a855f7' },
-  { value: 'healthScore', label: 'Health Score', color: '#22c55e' },
+  { value: 'healthScore', label: 'Consistency Score', color: '#22c55e' },
 ];
 
 function clampNumber(value: number, min: number, max: number): number {
